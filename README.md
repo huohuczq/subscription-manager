@@ -1,11 +1,10 @@
-# SubsTracker - 订阅管理与提醒系统
+# subscription-manager - 订阅管理与提醒系统
 
 基于 Cloudflare Workers 的轻量级订阅管理系统，帮助你轻松跟踪各类订阅服务的到期时间，并通过 Telegram、Webhook 等多渠道发送及时提醒。
 
-> 🎉 项目说明：
-> - 原有稳定版本代码已保留在 **`legacy-v1`** 分支（可随时回看/回滚）
-> - 从现在开始，**`main` 分支由 AI 托管持续迭代**（功能优化、体验升级、问题修复）
-> - 欢迎大家直接试用 `main` 分支，遇到问题就提 Issue —— 我会让 AI 第一时间跟进修改 👻
+subscription-manager 基于 [SubsTracker](https://github.com/wangwangit/SubsTracker)  二次开发，以便符合自己的喜欢和需求，以自用为主。
+
+感谢  [@wangwangit](https://github.com/wangwangit)  大佬辛勤付出和无私分享，为我们提供了简洁、美观、便捷的SubsTracker订阅管理系统
 
 ![image](https://github.com/user-attachments/assets/22ff1592-7836-4f73-aa13-24e9d43d7064)
 
@@ -71,8 +70,8 @@
 请先将项目下载到本地：
 
 ```bash
-git clone https://github.com/wangwangit/SubsTracker.git
-cd SubsTracker
+git clone https://github.com/huohuczq/subscription-manager.git
+cd subscription-manager
 ```
 
 > ⚠️ 必须进入包含 **package.json** 的项目目录后才能执行之后的 **npm install**。
@@ -227,33 +226,3 @@ npm run deploy:safe
 - Windows: `C:\Users\<你的用户名>\AppData\Roaming\xdg.config\.wrangler\`
 
 删除目录后，重新设置 token 再执行部署。
-
----
-
-## 欢迎关注我的公众号
-
-![39d8d5a902fa1eee6cbbbc8a0dcff4b](https://github.com/user-attachments/assets/96bae085-4299-4377-9958-9a3a11294efc)
-
----
-
-## 赞助
-
-本项目 CDN 加速及安全防护由 Tencent EdgeOne 赞助：EdgeOne 提供长期有效的免费套餐，包含不限量流量和请求，覆盖中国大陆节点，且无超额收费。
-
-[[Best Asian CDN, Edge, and Secure Solutions - Tencent EdgeOne](https://edgeone.ai/?from=github)]
-
-[![image](https://edgeone.ai/media/34fe3a45-492d-4ea4-ae5d-ea1087ca7b4b.png)](https://edgeone.ai/media/34fe3a45-492d-4ea4-ae5d-ea1087ca7b4b.png)
-
----
-
-## 🤝 贡献
-
-欢迎贡献代码、报告问题或提出新功能建议。
-
-## 📜 许可证
-
-MIT License
-
-## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=wangwangit/SubsTracker&type=Date)](https://www.star-history.com/#wangwangit/SubsTracker&Date)
