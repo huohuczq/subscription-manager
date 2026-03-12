@@ -102,7 +102,6 @@ npm -v
 6. 创建后复制 Token
 
 
-
 > ⚠️ Token 只显示一次，请妥善保存；泄露后请立刻删除重建。
 
 ---
@@ -125,7 +124,6 @@ npm run deploy:safe
 2. `npm run deploy`
    - 执行部署到 Cloudflare Workers
 
-![image-20260227170513582](https://img.996007.icu/file/1772183123590_20260227170513797.png)
 
 如果你是 Windows CMD：
 
