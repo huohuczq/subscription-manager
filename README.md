@@ -92,16 +92,16 @@ npm -v
 
 ### 3) 获取 Cloudflare API Token
 
-1. 打开 Cloudflare Dashboard → **My Profile** → **API Tokens**
-2. 点击 **Create Token**
-3. **强烈推荐**使用 Edit Cloudflare Workers 模版（Edit Cloudflare Workers）
+1. 打开 Cloudflare Dashboard → **配置文件** → **API 令牌**
+2. 点击 **创建令牌**
+3. **强烈推荐**使用 编辑 Cloudflare Workers → 使用模版
 4. 权限至少包含：
-   - Workers Scripts: Edit
-   - Workers KV Storage: Edit
-5. Account Resources 选择你的目标账号
+   - Workers 脚本: 编辑
+   - Workers KV 存储: 编辑
+5. 帐户资源 选择你的目标账号
 6. 创建后复制 Token
 
-![image-20260227170420115](https://img.996007.icu/file/1772183075773_20260227170427274.png)
+
 
 > ⚠️ Token 只显示一次，请妥善保存；泄露后请立刻删除重建。
 
