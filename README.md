@@ -196,10 +196,8 @@ npx wrangler kv key get --binding=SUBSCRIPTIONS_KV --env="" --remote subscriptio
 - **收件人邮箱**: 接收通知的邮箱
 
 ### 🔔 通知时间与时区说明
-- 后端调度与计算统一使用 **UTC**
-- `notificationHours` 按 **UTC 小时**解释
+- 前后端强制统一使用“系统配置的时区”（默认北京时间）
 - 留空表示全天允许发送
-- 前端页面时间按“当前设备时区”显示
 
 ### 🔐 第三方 API 安全调用
 - `POST /api/notify/{token}` 可触发系统通知
