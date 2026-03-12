@@ -2,7 +2,7 @@
 
 基于 Cloudflare Workers 的轻量级订阅管理系统，帮助你轻松跟踪各类订阅服务的到期时间，并通过 Telegram、Webhook 等多渠道发送及时提醒。
 
-subscription-manager 基于 [SubsTracker](https://github.com/wangwangit/SubsTracker)  二次开发，以便符合自己的喜欢和需求，以自用为主。
+Subscription Manager 基于 [SubsTracker](https://github.com/wangwangit/SubsTracker)  二次开发，以便符合自己的喜欢和需求，以自用为主。
 
 感谢  [@wangwangit](https://github.com/wangwangit)  大佬辛勤付出和无私分享，为我们提供了简洁、美观、便捷的SubsTracker订阅管理系统
 
