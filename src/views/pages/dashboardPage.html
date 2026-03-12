@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>仪表盘 - 订阅管理系统</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  ${themeResources}  
+  <style>
+    .stat-card{background:white;border-radius:12px;padding:1.5rem;box-shadow:0 2px 8px rgba(0,0,0,0.1);transition:transform 0.2s,box-shadow 0.2s}
+    .stat-card:hover{transform:translateY(-4px);box-shadow:0 4px 16px rgba(0,0,0,0.15)}
+    .stat-card-header{color:#6b7280;font-size:0.875rem;font-weight:500;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.5rem}
+    .stat-card-value{font-size:2rem;font-weight:700;color:#1f2937;margin-bottom:0.25rem}
+    .stat-card-subtitle{color:#9ca3af;font-size:0.875rem}
+    .stat-card-trend{display:inline-flex;align-items:center;gap:0.25rem;font-size:0.875rem;margin-top:0.5rem;padding:0.25rem 0.5rem;border-radius:6px}
+    .stat-card-trend.up{color:#10b981;background:#d1fae5}
+    .stat-card-trend.down{color:#ef4444;background:#fee2e2}
+    .stat-card-trend.flat{color:#6b7280;background:#f3f4f6}
+    .list-item{display:flex;align-items:center;justify-content:space-between;padding:1rem;border-radius:8px;transition:background 0.2s}
+    .list-item:hover{background:#f9fafb}
+    .list-item:not(:last-child){border-bottom:1px solid #f3f4f6}
+    .list-item-content{flex:1}
+    .list-item-name{font-weight:600;color:#1f2937;margin-bottom:0.25rem}
+    .list-item-meta{display:flex;align-items:center;gap:1rem;font-size:0.875rem;color:#6b7280;flex-wrap:wrap}
+    .list-item-amount{font-size:1.125rem;font-weight:700;color:#10b981}
+    .list-item-badge{display:inline-block;padding:0.25rem 0.75rem;border-radius:12px;font-size:0.75rem;font-weight:500;background:#e0e7ff;color:#4f46e5}
+    .ranking-item{margin-bottom:1rem}
+    .ranking-item-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem}
+    .ranking-item-name{font-weight:600;color:#1f2937}
+    .ranking-item-value{display:flex;align-items:center;gap:0.5rem;font-size:0.875rem}
+    .ranking-item-amount{font-weight:700;color:#1f2937}
+    .ranking-item-percentage{color:#10b981}
+    .ranking-progress{width:100%;height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden}
+    .ranking-progress-bar{height:100%;border-radius:4px;transition:width 0.6s ease}
+    .ranking-progress-bar.color-1{background:linear-gradient(90deg,#6366f1,#8b5cf6)}
+    .ranking-progress-bar.color-2{background:linear-gradient(90deg,#10b981,#059669)}
+    .ranking-progress-bar.color-3{background:linear-gradient(90deg,#f59e0b,#d97706)}
+    .ranking-progress-bar.color-4{background:linear-gradient(90deg,#ef4444,#dc2626)}
+    .ranking-progress-bar.color-5{background:linear-gradient(90deg,#8b5cf6,#7c3aed)}
+    .empty-state{text-align:center;padding:3rem 1rem;color:#9ca3af}
+    .empty-state-icon{font-size:3rem;margin-bottom:1rem;opacity:0.5}
+    .empty-state-text{font-size:0.875rem}
+    
+    /* === Dashboard 暗黑模式修复 === */
+    html.dark .stat-card {
+      background: #1f2937;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+    }
+    html.dark .stat-card-header { color: #9ca3af; }
+    html.dark .stat-card-value { color: #f3f4f6; } 
+    html.dark .stat-card-subtitle { color: #6b7280; } 
+    html.dark .stat-card-trend.flat { background: #374151; color: #9ca3af; }
+    html.dark .stat-card-trend.up { background: rgba(16, 185, 129, 0.2); }
+    html.dark .stat-card-trend.down { background: rgba(239, 68, 68, 0.2); }
+    html.dark .list-item:hover { background: #374151; }
+    html.dark .list-item:not(:last-child) { border-bottom-color: #374151; }
+    html.dark .list-item-name { color: #f3f4f6; } 
+    html.dark .list-item-meta { color: #9ca3af; }
+    html.dark .list-item-badge { background: #3730a3; color: #c7d2fe; }
+    html.dark .ranking-item-name { color: #f3f4f6; } 
+    html.dark .ranking-item-amount { color: #e5e7eb; } 
+    html.dark .ranking-progress { background: #374151; }
+    html.dark .bg-indigo-100 { background-color: rgba(99, 102, 241, 0.2) !important; color: #a5b4fc !important; }
+    html.dark .text-indigo-800 { color: #c7d2fe !important; }
+    
+    .loading-skeleton{background:linear-gradient(90deg,#f3f4f6 25%,#e5e7eb 50%,#f3f4f6 75%);background-size:200% 100%;animation:loading 1.5s infinite;height:100px;border-radius:8px}
+    html.dark .loading-skeleton { background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%); }
+    @keyframes loading{0%{background-position:200% 0}100%{background-position:-200% 0}}
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+  ${toast}
+  ${navbar}
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-6">
+      <h2 class="text-2xl font-bold text-gray-800">仪表盘</h2>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6" id="statsGrid">
+      <div class="loading-skeleton"></div>
+      <div class="loading-skeleton"></div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+      <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i class="fas fa-history text-indigo-500"></i>
+          <h3 class="text-lg font-medium text-gray-900">自动提醒任务状态</h3>
+        </div>
+        <span class="px-3 py-1 bg-indigo-100 text-indigo-800 text-xs font-medium rounded-full">Cron 可观测性</span>
+      </div>
+      <div class="p-6" id="schedulerStatus">
+        <div class="loading-skeleton"></div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+      <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i class="fas fa-clock text-yellow-500"></i>
+          <h3 class="text-lg font-medium text-gray-900">即将续费</h3>
+        </div>
+        <span class="px-3 py-1 bg-indigo-100 text-indigo-800 text-xs font-medium rounded-full">未来7天</span>
+      </div>
+      <div class="p-6" id="upcomingRenewals">
+        <div class="loading-skeleton"></div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+      <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i class="fas fa-stream text-indigo-500"></i>
+          <h3 class="text-lg font-medium text-gray-900">自动提醒任务历史（最近10次）</h3>
+        </div>
+      </div>
+      <div class="p-6" id="schedulerStatusHistory">
+        <div class="loading-skeleton"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    (function() {
+      // 定义货币符号映射
+      const currencySymbols = {
+        'CNY': '¥', 'USD': '$', 'HKD': 'HK$', 'TWD': 'NT$', 
+        'JPY': '¥', 'EUR': '€', 'GBP': '£', 'KRW': '₩', 'TRY': '₺'
+      };
+      
+      function getSymbol(currency) {
+        return currencySymbols[currency] || '¥';
+      }
+
+      async function loadDashboardData(){
+        try {
+          const r = await fetch('/api/dashboard/stats');
+          const d = await r.json();
+          if (!d.success) throw new Error(d.message || '加载失败');
+          
+          const data = d.data;
+
+          const schedulerStatusEl = document.getElementById('schedulerStatus');
+          if (schedulerStatusEl) {
+            const status = data.schedulerStatus;
+            if (!status) {
+              schedulerStatusEl.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🕐</div><div class="empty-state-text">暂无定时任务执行记录（等待下一次 Cron）</div></div>';
+            } else {
+              const sendResult = status.sendResult || {};
+              const runAt = status.lastRunAt ? new Date(status.lastRunAt).toLocaleString('zh-CN') : '未知';
+              const configuredHours = Array.isArray(status.configuredHours) && status.configuredHours.length > 0
+                ? status.configuredHours.join(', ')
+                : '全部时段';
+              const sentBadge = status.sent
+                ? '<span class="px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-700">本次有发送</span>'
+                : '<span class="px-2 py-1 rounded text-xs font-medium bg-yellow-100 text-yellow-700">本次未发送</span>';
+
+              schedulerStatusEl.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <div class="bg-gray-50 rounded-md p-3">
+                    <div class="text-gray-500">最近执行时间</div>
+                    <div class="text-gray-900 font-medium mt-1">${runAt}</div>
+                  </div>
+                  <div class="bg-gray-50 rounded-md p-3">
+                    <div class="text-gray-500">状态</div>
+                    <div class="mt-1">${sentBadge}</div>
+                  </div>
+                  <div class="bg-gray-50 rounded-md p-3">
+                    <div class="text-gray-500">当前小时 / 配置时段（UTC）</div>
+                    <div class="text-gray-900 font-medium mt-1">${status.currentHour || '--'} / ${configuredHours}</div>
+                  </div>
+                  <div class="bg-gray-50 rounded-md p-3">
+                    <div class="text-gray-500">检查与命中</div>
+                    <div class="text-gray-900 font-medium mt-1">检查 ${status.checkedSubscriptions || 0} 条，命中 ${status.expiringMatched || 0} 条</div>
+                  </div>
+                  <div class="bg-gray-50 rounded-md p-3 md:col-span-2">
+                    <div class="text-gray-500">发送结果</div>
+                    <div class="text-gray-900 font-medium mt-1">尝试 ${sendResult.attempted || 0} 个渠道，成功 ${sendResult.successCount || 0}，失败 ${sendResult.failedCount || 0}，去重跳过 ${status.dedupeSkipped || 0}</div>
+                    <div class="text-xs text-gray-500 mt-1">${status.reason || '暂无详情'}</div>
+                  </div>
+                </div>
+              `;
+            }
+          }
+
+          const schedulerHistory = Array.isArray(data.schedulerStatusHistory) ? data.schedulerStatusHistory : [];
+          const schedulerHistoryEl = document.getElementById('schedulerStatusHistory');
+          if (schedulerHistoryEl) {
+            if (schedulerHistory.length === 0) {
+              schedulerHistoryEl.innerHTML = '<div class="text-sm text-gray-500">暂无历史记录</div>';
+            } else {
+              schedulerHistoryEl.innerHTML = schedulerHistory.slice(0, 10).map(item => {
+                const when = item.lastRunAt ? new Date(item.lastRunAt).toLocaleString('zh-CN') : '未知时间';
+                const sent = item.sent ? '已发送' : '未发送';
+                const reason = item.reason || '-';
+                return `<div class="py-2 border-b border-gray-100 last:border-b-0 text-sm"><div class="font-medium text-gray-800">${when} · ${sent}</div><div class="text-xs text-gray-500 mt-1">${reason}</div></div>`;
+              }).join('');
+            }
+          }
+
+          document.getElementById('statsGrid').innerHTML=`
+            <div class="stat-card">
+              <div class="stat-card-header">活跃订阅</div>
+              <div class="stat-card-value">${data.activeSubscriptions.active}</div>
+              <div class="stat-card-subtitle">总订阅数: ${data.activeSubscriptions.total}</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-header">即将过期</div>
+              <div class="stat-card-value" style="color: #f97316;">${data.activeSubscriptions.expiringSoon || 0}</div>
+              <div class="stat-card-subtitle">未来 7 天内即将续费</div>
+            </div>
+          `;
+          
+          const ur = document.getElementById('upcomingRenewals');
+          ur.innerHTML = data.upcomingRenewals.length === 0 ? '<div class="empty-state"><div class="empty-state-icon">✅</div><div class="empty-state-text">未来7天内没有即将续费的订阅</div></div>' :
+          data.upcomingRenewals.map(s => `
+            <div class="list-item">
+              <div class="list-item-content">
+                <div class="list-item-name">${s.name}</div>
+                <div class="list-item-meta">
+                  <span><i class="fas fa-clock"></i> ${new Date(s.renewalDate).toLocaleDateString('zh-CN')}</span>
+                  <span style="color:#f59e0b;font-weight:600">${s.daysUntilRenewal} 天后</span>
+                  ${s.customType ? `<span class="list-item-badge">${s.customType}</span>` : ''}
+                </div>
+              </div>
+              <div class="list-item-amount">${getSymbol(s.currency)}${(s.amount || 0).toFixed(2)}</div>
+            </div>
+          `).join('');
+          
+        } catch(e) {
+          console.error('加载仪表盘数据失败:', e);
+          document.getElementById('statsGrid').innerHTML = '<div class="empty-state"><div class="empty-state-icon">❌</div><div class="empty-state-text">加载失败:' + e.message + '</div></div>';
+        }
+      }
+      
+      // 初始化数据加载
+      loadDashboardData();
+      setInterval(loadDashboardData, 60000);
+    })();
+  </script>
+</body>
+</html>

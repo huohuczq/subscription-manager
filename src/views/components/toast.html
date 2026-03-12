@@ -1,0 +1,39 @@
+<style>
+  .toast {
+    position: fixed; top: 20px; right: 20px; padding: 12px 20px; border-radius: 8px;
+    color: white; font-weight: 500; z-index: 9999; transform: translateX(400px);
+    transition: all 0.3s ease-in-out; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  .toast.show { transform: translateX(0); }
+  .toast.success { background-color: #10b981; }
+  .toast.error { background-color: #ef4444; }
+  .toast.info { background-color: #3b82f6; }
+  .toast.warning { background-color: #f59e0b; }
+  html.dark .toast { color: #f9fafb; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45); }
+  html.dark .toast.success { background-color: #059669; }
+  html.dark .toast.error { background-color: #dc2626; }
+  html.dark .toast.info { background-color: #2563eb; }
+  html.dark .toast.warning { background-color: #d97706; }
+</style>
+
+<div id="toast-container"></div>
+
+<script>
+  // 挂载到 window，使所有页面均可调用
+  window.showToast = function(message, type = 'success', duration = 3000) {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+    const toast = document.createElement('div');
+    toast.className = 'toast ' + type;
+    const icon = type === 'success' ? 'check-circle' :
+                 type === 'error' ? 'exclamation-circle' :
+                 type === 'warning' ? 'exclamation-triangle' : 'info-circle';
+    toast.innerHTML = '<div class="flex items-center"><i class="fas fa-' + icon + ' mr-2"></i><span>' + message + '</span></div>';
+    container.appendChild(toast);
+    setTimeout(() => toast.classList.add('show'), 100);
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => { if (container.contains(toast)) container.removeChild(toast); }, 300);
+    }, duration);
+  };
+</script>
