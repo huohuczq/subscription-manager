@@ -140,6 +140,14 @@ name = "subscription-manager-staging"
 
 
 
+
+
+
+
+
+
+
+
 # KV 命名空间配置（自动生成）
 [[kv_namespaces]]
 binding = "SUBSCRIPTIONS_KV"

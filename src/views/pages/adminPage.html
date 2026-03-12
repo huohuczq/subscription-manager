@@ -1412,11 +1412,26 @@
         document.getElementById('mobileNextPage')?.addEventListener('click', () => { const totalPages = Math.ceil(subscriptionsCache.length / itemsPerPage) || 1; if (currentPage < totalPages) { currentPage++; renderSubscriptionTable(); } });
       });
 
-      window.addEventListener('load', () => {
+      window.addEventListener('load', async () => {
         const checkTimezoneUpdate = () => { const lastUpdate = localStorage.getItem('timezoneUpdated'); if (lastUpdate && Date.now() - parseInt(lastUpdate) < 5000) { localStorage.removeItem('timezoneUpdated'); window.location.reload(); } };
         checkTimezoneUpdate(); setInterval(checkTimezoneUpdate, 2000);
-        async function initConfig() { try { const response = await fetch('/api/config'); const config = await response.json(); window.DEBUG_LOGS = config.DEBUG_LOGS === true; globalTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'; } catch (e) { console.error('获取配置失败', e); } }
-        initConfig(); loadSubscriptions();
+        
+        async function initConfig() { 
+          try { 
+            const response = await fetch('/api/config'); 
+            const config = await response.json(); 
+            window.DEBUG_LOGS = config.DEBUG_LOGS === true; 
+            // 优先使用后端配置的时区，如果没有则使用浏览器本地时区
+            globalTimezone = config.TIMEZONE || Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'; 
+          } catch (e) { 
+            console.error('获取配置失败', e); 
+            globalTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+          } 
+        }
+        
+        // 关键修复：加上 await，确保先拿到正确的时区后，再渲染订阅列表
+        await initConfig(); 
+        loadSubscriptions();
       });
     })();
   </script>

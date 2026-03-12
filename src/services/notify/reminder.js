@@ -1,4 +1,4 @@
-import { formatTimeInTimezone, formatTimezoneDisplay } from '../../core/time.js';
+import { formatTimeInTimezone, formatTimezoneDisplay, getTimezoneDateParts } from '../../core/time.js';
 import { lunarCalendar } from '../../core/lunar.js';
 
 function resolveReminderSetting(subscription) {
@@ -55,15 +55,17 @@ function formatNotificationContent(subscriptions, config) {
   for (const sub of subscriptions) {
     const typeText = sub.customType || '其他';
     const periodText = (sub.periodValue && sub.periodUnit) ? `(周期: ${sub.periodValue} ${ { day: '天', month: '月', year: '年' }[sub.periodUnit] || sub.periodUnit})` : '';
-    const categoryText = sub.category ? sub.category : '未分类';
     const reminderSetting = resolveReminderSetting(sub);
 
     const expiryDateObj = new Date(sub.expiryDate);
+    // 公历日期格式化（已自带时区处理）
     const formattedExpiryDate = formatTimeInTimezone(expiryDateObj, timezone, 'date');
 
     let lunarExpiryText = '';
     if (showLunar) {
-      const lunarExpiry = lunarCalendar.solar2lunar(expiryDateObj.getFullYear(), expiryDateObj.getMonth() + 1, expiryDateObj.getDate());
+      // 【关键修复】：使用 getTimezoneDateParts 提取配置时区下的真实年月日，确保农历与公历时区一致
+      const { year, month, day } = getTimezoneDateParts(expiryDateObj, timezone);
+      const lunarExpiry = lunarCalendar.solar2lunar(year, month, day);
       lunarExpiryText = lunarExpiry ? `\n农历日期: ${lunarExpiry.fullStr}` : '';
     }
 

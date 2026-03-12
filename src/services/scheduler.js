@@ -31,6 +31,7 @@ async function dedupeNotifications(env, subscriptions, bucketKey) {
       continue;
     }
 
+    // 默认去重 48 小时
     await env.SUBSCRIPTIONS_KV.put(key, '1', { expirationTtl: 60 * 60 * 48 });
     deduped.push(subscription);
   }
@@ -41,9 +42,10 @@ async function dedupeNotifications(env, subscriptions, bucketKey) {
 async function checkExpiringSubscriptions(env) {
   try {
     const config = await getConfig(env);
-    const timezone = 'UTC';
-    const currentTime = getCurrentTimeInTimezone('UTC');
-    const todayMidnight = getTimezoneMidnightTimestamp(currentTime, 'UTC');
+    // 动态获取用户的时区设置
+    const timezone = config.TIMEZONE || 'UTC';
+    const currentTime = getCurrentTimeInTimezone(timezone);
+    const todayMidnight = getTimezoneMidnightTimestamp(currentTime, timezone);
 
     const subscriptions = await getAllSubscriptions(env);
     const expiringSubscriptions = [];
@@ -106,9 +108,19 @@ async function checkExpiringSubscriptions(env) {
             if (subscription.periodUnit === 'day') {
               expiryDate.setDate(expiryDate.getDate() + subscription.periodValue);
             } else if (subscription.periodUnit === 'month') {
+              const originalDay = expiryDate.getDate();
               expiryDate.setMonth(expiryDate.getMonth() + subscription.periodValue);
+              // 修复原生 JS 月底溢出 Bug
+              if (expiryDate.getDate() !== originalDay) {
+                expiryDate.setDate(0);
+              }
             } else if (subscription.periodUnit === 'year') {
+              const originalDay = expiryDate.getDate();
               expiryDate.setFullYear(expiryDate.getFullYear() + subscription.periodValue);
+              // 防御闰年问题
+              if (expiryDate.getDate() !== originalDay) {
+                expiryDate.setDate(0);
+              }
             }
             periodsAdded++;
           }
@@ -144,9 +156,11 @@ async function checkExpiringSubscriptions(env) {
         updatedSubscriptions.push(updatedSubscription);
         hasUpdates = true;
 
+        // 重新计算更新后的剩余时间和到期提醒
         diffMs = newExpiryDate.getTime() - currentTime.getTime();
         diffHours = diffMs / MS_PER_HOUR;
         daysDiff = Math.ceil((newExpiryDate.getTime() - todayMidnight) / MS_PER_DAY);
+        
         const shouldRemindAfterRenewal = shouldTriggerReminder(reminderSetting, daysDiff, diffHours);
         if (shouldRemindAfterRenewal) {
           expiringSubscriptions.push({
@@ -158,14 +172,17 @@ async function checkExpiringSubscriptions(env) {
         continue;
       }
 
+      // 如果未启用自动续期，或者还未过期，正常判断提醒
       const shouldRemind = shouldTriggerReminder(reminderSetting, daysDiff, diffHours);
       if (daysDiff < 0 && subscription.autoRenew === false) {
+        // 已过期且未开启自动续期，应该通知
         expiringSubscriptions.push({
           ...subscription,
           daysRemaining: daysDiff,
           hoursRemaining: Math.round(diffHours)
         });
       } else if (shouldRemind) {
+        // 即将到期，触发提醒
         expiringSubscriptions.push({
           ...subscription,
           daysRemaining: daysDiff,
@@ -193,7 +210,7 @@ async function checkExpiringSubscriptions(env) {
         console.log(`[定时任务] ${status.reason}，跳过发送`);
       } else {
         expiringSubscriptions.sort((a, b) => a.daysRemaining - b.daysRemaining);
-        const bucketKey = `${new Date().toISOString().slice(0, 13)}`;
+        const bucketKey = `${new Date().toISOString().slice(0, 13)}`; // 精确到小时去重
         const dedupeResult = await dedupeNotifications(env, expiringSubscriptions, bucketKey);
         status.dedupeSkipped = dedupeResult.skipped;
 

@@ -138,14 +138,25 @@ const lunarBiz = {
         isLeap = false;
       }
     } else if (periodUnit === 'month') {
-      let totalMonths = (year - 1900) * 12 + (month - 1) + periodValue;
-      year = Math.floor(totalMonths / 12) + 1900;
-      month = (totalMonths % 12) + 1;
-      const leap = lunarCalendar.leapMonth(year);
-      if (isLeap && leap === month) {
-        isLeap = true;
-      } else {
-        isLeap = false;
+      // 修复：基于农历闰月规则逐月递进计算，防止忽略闰月导致跨度错乱
+      for (let i = 0; i < periodValue; i++) {
+        const leap = lunarCalendar.leapMonth(year);
+        if (leap > 0) {
+          if (month === leap && !isLeap) {
+            isLeap = true;
+          } else if (month === leap && isLeap) {
+            isLeap = false;
+            month++;
+          } else {
+            month++;
+          }
+        } else {
+          month++;
+        }
+        if (month > 12) {
+          month = 1;
+          year++;
+        }
       }
     } else if (periodUnit === 'day') {
       const solar = lunarBiz.lunar2solar(lunar);

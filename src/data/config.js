@@ -24,7 +24,7 @@ const DEFAULT_CONFIG = {
   BARK_IS_ARCHIVE: 'false',
   ENABLED_NOTIFIERS: ['notifyx'],
   THEME_MODE: 'system',
-  TIMEZONE: 'UTC',
+  TIMEZONE: 'Asia/Shanghai', // 改为北京/上海时间
   NOTIFICATION_HOURS: [],
   THIRD_PARTY_API_TOKEN: '',
   DEBUG_LOGS: false,
@@ -64,7 +64,7 @@ async function updateConfig(env, newConfig) {
     ADMIN_USERNAME: newConfig.ADMIN_USERNAME || config.ADMIN_USERNAME,
     ADMIN_PASSWORD: newConfig.ADMIN_PASSWORD || config.ADMIN_PASSWORD,
     THEME_MODE: newConfig.THEME_MODE || 'system',
-    TIMEZONE: newConfig.TIMEZONE || config.TIMEZONE || 'UTC',
+    TIMEZONE: newConfig.TIMEZONE || config.TIMEZONE || 'Asia/Shanghai',
     SHOW_LUNAR: newConfig.SHOW_LUNAR === true,
     NOTIFYX_API_KEY: newConfig.NOTIFYX_API_KEY || '',
     RESEND_API_KEY: newConfig.RESEND_API_KEY || '',

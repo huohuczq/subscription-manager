@@ -38,7 +38,10 @@ async function createSubscription(subscription, env) {
     }
 
     let expiryDate = new Date(subscription.expiryDate);
-    const currentTime = getCurrentTimeInTimezone('UTC');
+    // 动态获取用户的时区设置
+    const config = await getConfig(env);
+    const userTimezone = config.TIMEZONE || 'UTC';
+    const currentTime = getCurrentTimeInTimezone(userTimezone);
 
     let useLunar = !!subscription.useLunar;
     if (useLunar) {
@@ -62,9 +65,19 @@ async function createSubscription(subscription, env) {
           if (subscription.periodUnit === 'day') {
             expiryDate.setDate(expiryDate.getDate() + subscription.periodValue);
           } else if (subscription.periodUnit === 'month') {
+            const originalDay = expiryDate.getDate();
             expiryDate.setMonth(expiryDate.getMonth() + subscription.periodValue);
+            // 修复原生 JS 月底溢出 Bug（如 1月31日 加1个月变 3月3日 -> 回退为 2月28日）
+            if (expiryDate.getDate() !== originalDay) {
+              expiryDate.setDate(0);
+            }
           } else if (subscription.periodUnit === 'year') {
+            const originalDay = expiryDate.getDate();
             expiryDate.setFullYear(expiryDate.getFullYear() + subscription.periodValue);
+            // 防御闰年 2月29日 加1年变为 3月1日 的问题
+            if (expiryDate.getDate() !== originalDay) {
+              expiryDate.setDate(0);
+            }
           }
         }
         subscription.expiryDate = expiryDate.toISOString();
@@ -132,7 +145,10 @@ async function updateSubscription(id, subscription, env) {
     }
 
     let expiryDate = new Date(subscription.expiryDate);
-    const currentTime = getCurrentTimeInTimezone('UTC');
+    // 动态获取用户的时区设置
+    const config = await getConfig(env);
+    const userTimezone = config.TIMEZONE || 'UTC';
+    const currentTime = getCurrentTimeInTimezone(userTimezone);
 
     let useLunar = !!subscription.useLunar;
     if (useLunar) {
@@ -158,9 +174,17 @@ async function updateSubscription(id, subscription, env) {
           if (subscription.periodUnit === 'day') {
             expiryDate.setDate(expiryDate.getDate() + subscription.periodValue);
           } else if (subscription.periodUnit === 'month') {
+            const originalDay = expiryDate.getDate();
             expiryDate.setMonth(expiryDate.getMonth() + subscription.periodValue);
+            if (expiryDate.getDate() !== originalDay) {
+              expiryDate.setDate(0);
+            }
           } else if (subscription.periodUnit === 'year') {
+            const originalDay = expiryDate.getDate();
             expiryDate.setFullYear(expiryDate.getFullYear() + subscription.periodValue);
+            if (expiryDate.getDate() !== originalDay) {
+              expiryDate.setDate(0);
+            }
           }
         }
         subscription.expiryDate = expiryDate.toISOString();
@@ -256,7 +280,8 @@ async function manualRenewSubscription(id, env, options = {}) {
     }
 
     const config = await getConfig(env);
-    const currentTime = getCurrentTimeInTimezone('UTC');
+    const userTimezone = config.TIMEZONE || 'UTC';
+    const currentTime = getCurrentTimeInTimezone(userTimezone);
 
     const paymentDate = options.paymentDate ? new Date(options.paymentDate) : currentTime;
     const amount = options.amount !== undefined ? options.amount : subscription.amount || 0;
@@ -298,13 +323,20 @@ async function manualRenewSubscription(id, env, options = {}) {
       if (subscription.periodUnit === 'day') {
         newExpiryDate.setDate(newExpiryDate.getDate() + totalPeriodValue);
       } else if (subscription.periodUnit === 'month') {
+        const originalDay = newExpiryDate.getDate();
         newExpiryDate.setMonth(newExpiryDate.getMonth() + totalPeriodValue);
+        if (newExpiryDate.getDate() !== originalDay) {
+          newExpiryDate.setDate(0);
+        }
       } else if (subscription.periodUnit === 'year') {
+        const originalDay = newExpiryDate.getDate();
         newExpiryDate.setFullYear(newExpiryDate.getFullYear() + totalPeriodValue);
+        if (newExpiryDate.getDate() !== originalDay) {
+          newExpiryDate.setDate(0);
+        }
       }
     }
 
-    // 正确提取备注字段，允许保存空白备注，不再强制兜底为 '手动续订'
     let note = '';
     if (options.note !== undefined && options.note !== null) {
         note = options.note;

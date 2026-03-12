@@ -2,28 +2,6 @@
 const MS_PER_HOUR = 1000 * 60 * 60;
 const MS_PER_DAY = MS_PER_HOUR * 24;
 
-function getCurrentTimeInTimezone(timezone = 'UTC') {
-  try {
-    return new Date();
-  } catch (error) {
-    console.error(`时区转换错误: ${error.message}`);
-    return new Date();
-  }
-}
-
-function getTimestampInTimezone(timezone = 'UTC') {
-  return getCurrentTimeInTimezone(timezone).getTime();
-}
-
-function convertUTCToTimezone(utcTime, timezone = 'UTC') {
-  try {
-    return new Date(utcTime);
-  } catch (error) {
-    console.error(`时区转换错误: ${error.message}`);
-    return new Date(utcTime);
-  }
-}
-
 function getTimezoneDateParts(date, timezone = 'UTC') {
   try {
     const formatter = new Intl.DateTimeFormat('en-US', {
@@ -55,6 +33,33 @@ function getTimezoneDateParts(date, timezone = 'UTC') {
       minute: date.getUTCMinutes(),
       second: date.getUTCSeconds()
     };
+  }
+}
+
+function getCurrentTimeInTimezone(timezone = 'UTC') {
+  try {
+    // 提取目标时区当前的年月日时分秒
+    const parts = getTimezoneDateParts(new Date(), timezone);
+    // 组合成一个自带偏移量修正的 UTC Date 对象，确保在比较时拥有正确的绝对值
+    return new Date(Date.UTC(parts.year, parts.month - 1, parts.day, parts.hour, parts.minute, parts.second));
+  } catch (error) {
+    console.error(`时区转换错误: ${error.message}`);
+    return new Date();
+  }
+}
+
+function getTimestampInTimezone(timezone = 'UTC') {
+  return getCurrentTimeInTimezone(timezone).getTime();
+}
+
+function convertUTCToTimezone(utcTime, timezone = 'UTC') {
+  try {
+    const date = new Date(utcTime);
+    const parts = getTimezoneDateParts(date, timezone);
+    return new Date(Date.UTC(parts.year, parts.month - 1, parts.day, parts.hour, parts.minute, parts.second));
+  } catch (error) {
+    console.error(`时区转换错误: ${error.message}`);
+    return new Date(utcTime);
   }
 }
 

@@ -4,6 +4,7 @@ import { handleDebug } from './api/debug.js';
 import { getCurrentTimeInTimezone } from './core/time.js';
 import { checkExpiringSubscriptions } from './services/scheduler.js';
 import { getUserFromRequest } from './api/handlers/auth.js';
+import { getConfig } from './data/config.js'; // 修正：指向 data 文件夹下的 config.js
 
 export default {
   async fetch(request, env, ctx) {
@@ -29,8 +30,15 @@ export default {
   },
 
   async scheduled(event, env, ctx) {
-    const currentTime = getCurrentTimeInTimezone('UTC');
-    console.log('[Workers] 定时任务触发', 'cron:', event?.cron || '(unknown)', 'UTC:', new Date().toISOString(), 'runtime:', currentTime.toISOString());
+    // 动态获取用户配置的时区
+    const config = await getConfig(env);
+    const userTimezone = config.TIMEZONE || 'UTC';
+    const currentTime = getCurrentTimeInTimezone(userTimezone);
+    
+    // 日志也一并修正，打印出当前真实的业务时区
+    console.log('[Workers] 定时任务触发', 'cron:', event?.cron || '(unknown)', '时区:', userTimezone, '执行时间:', currentTime.toISOString());
+    
+    // 执行真正的到期检查与推送逻辑
     await checkExpiringSubscriptions(env);
   }
 };
