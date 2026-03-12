@@ -92,7 +92,7 @@
             <tr>
               <th scope="col" class="px-4 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider" style="width: 20%;">名称</th>
               <th scope="col" class="px-4 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider" style="width: 10%;">类型</th>
-              <th scope="col" class="px-4 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider" style="width: 17%;">到期时间 <i class="fas fa-sort-up ml-1 text-indigo-500" title="按到期时间升序排列"></i></th>
+              <th scope="col" class="px-4 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider" style="width: 17%;">到期 <i class="fas fa-sort-up ml-1 text-indigo-500" title="按到期时间升序排列"></i></th>
               <th scope="col" class="px-4 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider" style="width: 9%;">金额</th>
               <th scope="col" class="px-4 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider" style="width: 9%;">周期</th>
               <th scope="col" class="px-4 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider" style="width: 10%;">状态</th>
@@ -331,7 +331,7 @@
         <div class="p-3 bg-indigo-50 rounded-md border border-indigo-100">
           <div class="text-xs text-indigo-700 flex items-start">
             <i class="fas fa-info-circle mt-0.5 mr-1.5"></i>
-            <span style="line-height: 1.4;">提交后将生成一条支付历史，并根据当前周期自动延长下一次的到期时间。</span>
+            <span style="line-height: 1.4;">提交将生成新订阅记录，并依当前周期自动延长下一次的到期时间。</span>
           </div>
           <div class="mt-3 pt-3 border-t border-indigo-200/60">
             <div class="flex justify-between items-center mb-1 text-sm">
@@ -381,6 +381,39 @@
       </div>
     </div>
   </div>
+
+  <div id="editHistoryModal" class="fixed inset-0 z-[60] hidden overflow-y-auto bg-gray-600 bg-opacity-50 flex items-center justify-center" style="z-index: 60;">
+    <div class="relative w-full max-w-sm mx-4 bg-white rounded-lg shadow-xl">
+      <div class="flex items-center justify-between px-5 py-3 border-b border-gray-200 bg-gray-50 rounded-t-lg">
+        <h3 class="text-base font-medium text-gray-900"><i class="fas fa-edit mr-2 text-blue-500"></i>编辑记录</h3>
+        <button id="closeEditHistoryBtn" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+      </div>
+      <form id="editHistoryForm" class="p-5 space-y-4">
+        <input type="hidden" id="editHistorySubId">
+        <input type="hidden" id="editHistoryRecordId">
+        
+        <div>
+          <label class="block text-xs font-medium text-gray-700 mb-1">支付日期</label>
+          <input type="date" id="editHistoryDate" required class="w-full px-3 text-sm border border-gray-300 rounded-md bg-white focus:outline-none focus:border-indigo-500" style="height: 36px;">
+        </div>
+        
+        <div>
+          <label class="block text-xs font-medium text-gray-700 mb-1">金额</label>
+          <input type="number" id="editHistoryAmount" step="0.01" min="0" class="w-full px-3 text-sm border border-gray-300 rounded-md bg-white focus:outline-none focus:border-indigo-500" style="height: 36px;">
+        </div>
+        
+        <div>
+          <label class="block text-xs font-medium text-gray-700 mb-1">备注</label>
+          <input type="text" id="editHistoryNote" class="w-full px-3 text-sm border border-gray-300 rounded-md bg-white focus:outline-none focus:border-indigo-500" style="height: 36px;" placeholder="留空则显示为未备注">
+        </div>
+        
+        <div class="flex justify-end space-x-3 pt-2">
+          <button type="button" id="cancelEditHistoryBtn" class="px-4 py-2 border border-gray-300 rounded-md text-sm text-gray-700 bg-white hover:bg-gray-50">取消</button>
+          <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-md text-sm font-medium shadow-md">保存修改</button>
+        </div>
+      </form>
+    </div>
+  </div>
   
   ${lunarTools}
 
@@ -394,10 +427,8 @@
       
       const TYPE_OPTIONS = [ "流媒体", "视频平台", "音乐平台", "云服务", "软件订阅", "域名", "服务器", "会员服务", "学习平台", "健身/运动", "游戏", "新闻/杂志", "生日", "纪念日", "其他" ];
       
-      // 提取通用货币符号定义
       const CURRENCY_SYMBOLS = { 'CNY': '¥', 'USD': '$', 'HKD': 'HK$', 'TWD': 'NT$', 'JPY': '¥', 'EUR': '€', 'GBP': '£', 'KRW': '₩', 'TRY': '₺' };
 
-      // 工具函数：文本截断
       function truncateText(text, maxLength = 16) {
         if (!text) return '';
         return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
@@ -708,7 +739,7 @@
           row.innerHTML =
             '<td data-label="名称" class="px-4 py-3"><div class="td-content-wrapper">' + nameHtml + notesHtml + '</div></td>' +
             '<td data-label="类型" class="px-4 py-3"><div class="td-content-wrapper space-y-1">' + typeHtml + subscriptionModeHtml + '</div></td>' +
-            '<td data-label="到期时间" class="px-4 py-3"><div class="td-content-wrapper">' + daysLeftDisplay + startDateLine + expiryDateLine + '</div></td>' +
+            '<td data-label="到期" class="px-4 py-3"><div class="td-content-wrapper">' + daysLeftDisplay + startDateLine + expiryDateLine + '</div></td>' +
             '<td data-label="金额" class="px-4 py-3"><div class="td-content-wrapper">' + amountHtml + '</div></td>' +
             '<td data-label="周期" class="px-4 py-3"><div class="td-content-wrapper">' + periodCellHtml + '</div></td>' +
             '<td data-label="状态" class="px-4 py-3"><div class="td-content-wrapper">' + statusHtml + '</div></td>' +
@@ -739,7 +770,6 @@
         document.querySelectorAll('.edit').forEach(button => button.addEventListener('click', editSubscription));
         document.querySelectorAll('.delete').forEach(button => button.addEventListener('click', deleteSubscription));
         document.querySelectorAll('.toggle-status').forEach(button => button.addEventListener('click', toggleSubscriptionStatus));
-        // 绑定手动续费与历史的事件
         document.querySelectorAll('.renew-now').forEach(button => button.addEventListener('click', openRenewModal));
         document.querySelectorAll('.view-history').forEach(button => button.addEventListener('click', viewPaymentHistory));
         document.querySelectorAll('.test-notify').forEach(button => button.addEventListener('click', testSubscriptionNotification));
@@ -954,7 +984,7 @@
       }
 
       // ==========================================
-      // ★ 核心日期计算逻辑提取 (用于续订预览与历史周期推算)
+      // ★ 核心日期计算逻辑提取
       // ==========================================
       function calculateNextExpiryStr(sub, referenceDate = null) {
         const val = parseInt(sub.periodValue) || 1;
@@ -962,12 +992,10 @@
         let baseDate;
 
         if (referenceDate) {
-            // 如果传入了基准时间，强制以此时间进行推算（用于历史记录回溯计算）
             baseDate = new Date(referenceDate);
         } else {
             if (!sub.expiryDate) return '未知';
             baseDate = new Date(sub.expiryDate);
-            // 常规续订预览：如果是到期重置，则从今天开始计算
             if (sub.subscriptionMode === 'reset') baseDate = new Date();
         }
 
@@ -995,7 +1023,6 @@
         const sub = subscriptionsCache.find(s => s.id === id);
         if (!sub) return;
 
-        // 动态标题与币种符号
         const subName = truncateText(sub.name, 15);
         document.getElementById('renewModalTitle').innerHTML = `<i class="fas fa-sync-alt mr-2 text-indigo-500"></i>手动续订 - ${subName}`;
         document.getElementById('renewCurrencySymbol').textContent = CURRENCY_SYMBOLS[sub.currency] || '¥';
@@ -1044,7 +1071,7 @@
                 body: JSON.stringify({ 
                     amount: amount ? parseFloat(amount) : null, 
                     paymentDate, 
-                    notes 
+                    note: notes.trim() // 【修复点】：提交参数名改为 note，防止后端误判为空
                 })
             });
             const data = await res.json();
@@ -1065,14 +1092,23 @@
       });
 
       // ==========================================
-      // ★ 历史记录展示逻辑 (增加计算范围及增删改入口)
+      // ★ 历史记录展示、编辑与删除逻辑
       // ==========================================
+      window.currentHistoryRecords = [];
+
       async function viewPaymentHistory(e) {
         const btn = e.currentTarget;
         const id = btn.dataset.id;
-        const originalHtml = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>加载中';
-        btn.disabled = true;
+        await renderHistoryList(id, btn);
+      }
+
+      async function renderHistoryList(id, btn = null) {
+        let originalHtml = '';
+        if (btn) {
+            originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>加载中';
+            btn.disabled = true;
+        }
 
         try {
             let records = [];
@@ -1086,7 +1122,6 @@
             
             const sub = subscriptionsCache.find(s => s.id === id);
             
-            // 动态标题
             const subName = truncateText(sub ? sub.name : '未知订阅', 15);
             document.getElementById('historyModalTitle').innerHTML = `<i class="fas fa-history mr-2 text-indigo-500"></i>订阅记录 - ${subName}`;
             
@@ -1094,21 +1129,23 @@
                records = sub.paymentHistory || sub.history || [];
             }
 
-            // 智能混入“初始订阅”
             if (sub && sub.startDate) {
-                const initialExists = records.some(r => r.isInitial || (r.notes && r.notes.includes('初始')));
+                const initialExists = records.some(r => r.isInitial || r.type === 'initial' || (r.note && r.note.includes('初始')) || (r.notes && r.notes.includes('初始')));
                 if (!initialExists) {
                     records.push({
                         id: 'initial-' + Date.now(),
                         date: sub.startDate,
                         amount: sub.amount,
-                        notes: '初始订阅',
+                        note: '初始订阅',
+                        type: 'initial',
                         isInitial: true
                     });
                 }
             }
 
-            // 先按时间升序排序，以正确推算周期的时间线
+            window.currentHistoryRecords = records;
+
+            // 1. 恢复：先按时间升序，保障推算逻辑正确顺延
             records.sort((a, b) => new Date(a.date || a.paymentDate || a.createdAt) - new Date(b.date || b.paymentDate || b.createdAt));
 
             let cycleCurrentEnd = null;
@@ -1116,13 +1153,19 @@
 
             const formattedRecords = records.map((r, index) => {
                 const rDate = new Date(r.date || r.paymentDate || r.createdAt);
-                if (index === 0) originalStartDate = rDate; // 记录整个订阅的最初始时间
+                if (index === 0) originalStartDate = rDate; 
 
                 let startStr = '';
                 let endStr = '';
 
-                if (sub && sub.subscriptionMode === 'reset') {
-                    // 【到期重置模式】
+                // 如果后端存了绝对的 periodBounds 则优先读取
+                if (r.periodStart && r.periodEnd) {
+                    const s = new Date(r.periodStart);
+                    const e = new Date(r.periodEnd);
+                    startStr = `${s.getFullYear()}/${s.getMonth() + 1}/${s.getDate()}`;
+                    endStr = `${e.getFullYear()}/${e.getMonth() + 1}/${e.getDate()}`;
+                } else if (sub && sub.subscriptionMode === 'reset') {
+                    // 到期重置 回退推算
                     startStr = `${rDate.getFullYear()}/${rDate.getMonth() + 1}/${rDate.getDate()}`;
                     const nextRaw = calculateNextExpiryStr(sub, rDate);
                     if (nextRaw && nextRaw !== '未知') {
@@ -1132,7 +1175,7 @@
                         endStr = '未知';
                     }
                 } else {
-                    // 【循环订阅模式】
+                    // 循环订阅 回退推算 (起始固定，结束累加)
                     if (index === 0) {
                         cycleCurrentEnd = rDate;
                     }
@@ -1143,22 +1186,22 @@
                     } else {
                         endStr = '未知';
                     }
-                    startStr = `${originalStartDate.getFullYear()}/${originalStartDate.getMonth() + 1}/${originalStartDate.getDate()}`;
+                    startStr = originalStartDate ? `${originalStartDate.getFullYear()}/${originalStartDate.getMonth() + 1}/${originalStartDate.getDate()}` : `${rDate.getFullYear()}/${rDate.getMonth() + 1}/${rDate.getDate()}`;
                 }
 
                 return {
                     ...r,
                     rDate,
                     cycleDisplay: `${startStr} - ${endStr}`,
-                    recordTitleDate: `${rDate.getFullYear()}/${rDate.getMonth() + 1}/${rDate.getDate()}` // 每条记录本身的发生日期
+                    recordTitleDate: `${rDate.getFullYear()}/${rDate.getMonth() + 1}/${rDate.getDate()}`
                 };
             });
 
-            // 恢复为降序显示 (最新的记录在最上面)
+            // 2. 将数据逆转，恢复面板最新的在上面显示
             formattedRecords.sort((a, b) => b.rDate - a.rDate);
 
             const totalAmount = formattedRecords.reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0);
-            const renewCount = formattedRecords.length;
+            const renewCount = formattedRecords.length; 
             
             document.getElementById('historyTotalAmount').textContent = '¥ ' + totalAmount.toFixed(2);
             document.getElementById('historyCount').textContent = renewCount + ' 次';
@@ -1166,8 +1209,18 @@
             const listContainer = document.getElementById('historyList');
             if (formattedRecords.length > 0) {
                 listContainer.innerHTML = '<div class="relative ml-2 mt-2">' + formattedRecords.map((r, index) => {
-                    const isInitial = r.isInitial || (r.notes && r.notes.includes('初始'));
-                    const isAuto = r.notes && r.notes.includes('自动');
+                    const isInitial = r.isInitial || r.type === 'initial' || (r.note && r.note.includes('初始')) || (r.notes && r.notes.includes('初始'));
+                    const isAuto = r.type === 'auto' || (r.note && r.note.includes('自动')) || (r.notes && r.notes.includes('自动'));
+                    
+                    // 【修复点】：过滤备注，如果是由于旧 Bug 强制存入的'手动续订'字样则清空；处理完毕后为空则渲染“未备注”
+                    let finalNote = (r.note || r.notes || '').trim();
+                    if (finalNote === '手动续订' && r.type === 'manual') {
+                        finalNote = '';
+                    }
+
+                    let noteHtml = finalNote 
+                        ? `<div class="flex items-center text-gray-500"><i class="fas fa-align-left mr-1 text-gray-400"></i>${finalNote}</div>`
+                        : `<div class="flex items-center text-gray-400"><i class="fas fa-align-left mr-1 text-gray-300"></i>未备注</div>`;
                     
                     let badgeHtml = '';
                     let dotColorClass = '';
@@ -1197,12 +1250,12 @@
                                         <span class="font-medium text-gray-900 text-sm">${r.recordTitleDate}</span>
                                         ${badgeHtml}
                                     </div>
-                                    <div class="text-sm font-bold text-gray-900">${r.amount ? currencySymbol + ' ' + parseFloat(r.amount).toFixed(2) : '-'}</div>
+                                    <div class="text-sm font-bold text-gray-900">${r.amount !== null && r.amount !== undefined ? currencySymbol + ' ' + parseFloat(r.amount).toFixed(2) : '-'}</div>
                                 </div>
                                 <div class="flex justify-between items-end mt-1.5">
                                     <div class="text-xs text-gray-500">
                                         <div class="mb-0.5 flex items-center"><i class="fas fa-sync-alt mr-1 text-gray-400"></i>订阅周期: ${r.cycleDisplay}</div>
-                                        <div class="flex items-center"><i class="fas fa-align-left mr-1 text-gray-400"></i>${r.notes ? r.notes : '无备注'}</div>
+                                        ${noteHtml}
                                     </div>
                                     <div class="flex space-x-2 shrink-0">
                                         <button type="button" class="text-blue-500 hover:text-blue-700 p-1 transition-colors" onclick="window.editHistoryRecord('${id}', '${safeRecordId}')" title="编辑">
@@ -1226,28 +1279,115 @@
         } catch (err) {
             window.showToast('生成历史记录面板失败', 'error');
         } finally {
-            btn.innerHTML = originalHtml;
-            btn.disabled = false;
+            if (btn) {
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+            }
         }
       }
 
       document.getElementById('closeHistoryModalBtn').addEventListener('click', () => { document.getElementById('historyModal').classList.add('hidden'); document.body.classList.remove('overflow-hidden'); });
       document.getElementById('closeHistoryBtnBottom').addEventListener('click', () => { document.getElementById('historyModal').classList.add('hidden'); document.body.classList.remove('overflow-hidden'); });
 
-      // ★ 历史记录 编辑 与 删除占位事件
       window.editHistoryRecord = function(subId, recordId) {
-          window.showToast('该功能正在开发中，需配合后端接口升级。', 'info');
+          const record = (window.currentHistoryRecords || []).find(r => String(r.id) === String(recordId));
+          if (!record) {
+              window.showToast('无法读取该记录详情', 'error');
+              return;
+          }
+
+          if (record.isInitial || record.type === 'initial') {
+              window.showToast('【初始订阅】受主配置保护，请通过主界面的“编辑”按钮来修改初始日期和金额。', 'info');
+              return;
+          }
+
+          document.getElementById('editHistorySubId').value = subId;
+          document.getElementById('editHistoryRecordId').value = recordId;
+          
+          const d = new Date(record.date || record.paymentDate || record.createdAt);
+          const yyyy = d.getFullYear();
+          const mm = String(d.getMonth() + 1).padStart(2, '0');
+          const dd = String(d.getDate()).padStart(2, '0');
+          document.getElementById('editHistoryDate').value = `${yyyy}-${mm}-${dd}`;
+          
+          document.getElementById('editHistoryAmount').value = record.amount !== undefined && record.amount !== null ? record.amount : '';
+          
+          let finalNote = (record.note || record.notes || '').trim();
+          if (finalNote === '手动续订' && record.type === 'manual') finalNote = '';
+          document.getElementById('editHistoryNote').value = finalNote;
+
+          document.getElementById('editHistoryModal').classList.remove('hidden');
       };
+
+      document.getElementById('closeEditHistoryBtn').addEventListener('click', () => { document.getElementById('editHistoryModal').classList.add('hidden'); });
+      document.getElementById('cancelEditHistoryBtn').addEventListener('click', () => { document.getElementById('editHistoryModal').classList.add('hidden'); });
+
+      document.getElementById('editHistoryForm').addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const subId = document.getElementById('editHistorySubId').value;
+          const recordId = document.getElementById('editHistoryRecordId').value;
+          const date = document.getElementById('editHistoryDate').value;
+          const amount = document.getElementById('editHistoryAmount').value;
+          const note = document.getElementById('editHistoryNote').value;
+
+          const btn = e.target.querySelector('button[type="submit"]');
+          const origHtml = btn.innerHTML;
+          btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>保存中';
+          btn.disabled = true;
+
+          try {
+              const res = await fetch(`/api/subscriptions/${subId}/payments/${recordId}`, {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ 
+                      date: date,
+                      amount: amount ? parseFloat(amount) : null,
+                      note: note 
+                  })
+              });
+              const data = await res.json();
+              if (res.ok && data.success) {
+                  window.showToast('记录修改成功', 'success');
+                  document.getElementById('editHistoryModal').classList.add('hidden');
+                  loadSubscriptions(false); 
+                  renderHistoryList(subId); 
+              } else {
+                  window.showToast('修改失败: ' + (data.message || '未知错误'), 'error');
+              }
+          } catch (err) {
+              window.showToast('网络请求错误', 'error');
+          } finally {
+              btn.innerHTML = origHtml;
+              btn.disabled = false;
+          }
+      });
       
-      window.deleteHistoryRecord = function(subId, recordId) {
-          if(confirm('确定要删除这条历史记录吗？')) {
-              window.showToast('删除历史记录需要后端接口支持，暂未实现。', 'info');
+      window.deleteHistoryRecord = async function(subId, recordId) {
+          const record = (window.currentHistoryRecords || []).find(r => String(r.id) === String(recordId));
+          if (record && (record.isInitial || record.type === 'initial')) {
+              window.showToast('无法删除初始记录。如果想删除订阅，请在主界面点击“删除”。', 'error');
+              return;
+          }
+
+          if(!confirm('确定要删除这条历史记录吗？删除后系统将重新计算订阅到期时间。')) return;
+
+          try {
+              const res = await fetch(`/api/subscriptions/${subId}/payments/${recordId}`, {
+                  method: 'DELETE'
+              });
+              const data = await res.json();
+              if (res.ok && data.success) {
+                  window.showToast('记录已删除', 'success');
+                  loadSubscriptions(false); 
+                  renderHistoryList(subId); 
+              } else {
+                  window.showToast('删除失败: ' + (data.message || '未知错误'), 'error');
+              }
+          } catch (err) {
+              window.showToast('网络请求错误', 'error');
           }
       };
 
-      // ==========================================
-      // ★ 通知测试逻辑
-      // ==========================================
       async function testSubscriptionNotification(e) {
         const btn = e.currentTarget;
         const id = btn.dataset.id;
@@ -1266,7 +1406,6 @@
         }
       }
 
-      // 事件监听和初始化
       document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('itemsPerPage')?.addEventListener('change', (e) => { itemsPerPage = parseInt(e.target.value, 10); currentPage = 1; renderSubscriptionTable(); });
         document.getElementById('mobilePrevPage')?.addEventListener('click', () => { if (currentPage > 1) { currentPage--; renderSubscriptionTable(); } });

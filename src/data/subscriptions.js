@@ -257,34 +257,31 @@ async function manualRenewSubscription(id, env, options = {}) {
 
     const config = await getConfig(env);
     const currentTime = getCurrentTimeInTimezone('UTC');
-    const todayMidnight = getTimezoneMidnightTimestamp(currentTime, 'UTC');
-    void todayMidnight;
 
     const paymentDate = options.paymentDate ? new Date(options.paymentDate) : currentTime;
     const amount = options.amount !== undefined ? options.amount : subscription.amount || 0;
     const periodMultiplier = options.periodMultiplier || 1;
-    const note = options.note || '手动续订';
     const mode = subscription.subscriptionMode || 'cycle';
 
     let newStartDate;
+    let baseDateForExpiry;
     let currentExpiryDate = new Date(subscription.expiryDate);
 
     if (mode === 'reset') {
       newStartDate = new Date(paymentDate);
+      baseDateForExpiry = new Date(paymentDate);
     } else {
-      if (currentExpiryDate.getTime() > paymentDate.getTime()) {
-        newStartDate = new Date(currentExpiryDate);
-      } else {
-        newStartDate = new Date(paymentDate);
-      }
+      // 循环订阅：维持最开始的StartDate不变，以原来的到期日为基准往后加
+      newStartDate = subscription.startDate ? new Date(subscription.startDate) : new Date(subscription.createdAt || paymentDate);
+      baseDateForExpiry = new Date(currentExpiryDate);
     }
 
     let newExpiryDate;
     if (subscription.useLunar) {
       const solarStart = {
-        year: newStartDate.getFullYear(),
-        month: newStartDate.getMonth() + 1,
-        day: newStartDate.getDate()
+        year: baseDateForExpiry.getFullYear(),
+        month: baseDateForExpiry.getMonth() + 1,
+        day: baseDateForExpiry.getDate()
       };
       let lunar = lunarCalendar.solar2lunar(solarStart.year, solarStart.month, solarStart.day);
 
@@ -295,7 +292,7 @@ async function manualRenewSubscription(id, env, options = {}) {
       const solar = lunarBiz.lunar2solar(nextLunar);
       newExpiryDate = new Date(solar.year, solar.month - 1, solar.day);
     } else {
-      newExpiryDate = new Date(newStartDate);
+      newExpiryDate = new Date(baseDateForExpiry);
       const totalPeriodValue = subscription.periodValue * periodMultiplier;
 
       if (subscription.periodUnit === 'day') {
@@ -307,17 +304,26 @@ async function manualRenewSubscription(id, env, options = {}) {
       }
     }
 
+    // 正确提取备注字段，允许保存空白备注，不再强制兜底为 '手动续订'
+    let note = '';
+    if (options.note !== undefined && options.note !== null) {
+        note = options.note;
+    } else if (options.notes !== undefined && options.notes !== null) {
+        note = options.notes;
+    }
+
     const paymentRecord = {
       id: Date.now().toString(),
       date: paymentDate.toISOString(),
       amount: amount,
       type: 'manual',
       note: note,
-      periodStart: newStartDate.toISOString(),
+      // 循环模式的记录起始设为绝对的 initialStartDate
+      periodStart: mode === 'reset' ? paymentDate.toISOString() : newStartDate.toISOString(),
       periodEnd: newExpiryDate.toISOString()
     };
 
-    const paymentHistoryLimit = (await getConfig(env)).PAYMENT_HISTORY_LIMIT || 100;
+    const paymentHistoryLimit = config.PAYMENT_HISTORY_LIMIT || 100;
     const paymentHistory = subscription.paymentHistory || [];
     paymentHistory.push(paymentRecord);
     const trimmedPaymentHistory = trimPaymentHistory(paymentHistory, paymentHistoryLimit);

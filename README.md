@@ -3,9 +3,7 @@
 基于 Cloudflare Workers 的轻量级订阅管理系统，帮助你轻松跟踪各类订阅服务的到期时间，并通过 Telegram、Webhook 等多渠道发送及时提醒。
 
 > 🎉 项目说明：
-> - 原有稳定版本代码已保留在 **`legacy-v1`** 分支（可随时回看/回滚）
-> - 从现在开始，**`main` 分支由 AI 托管持续迭代**（功能优化、体验升级、问题修复）
-> - 欢迎大家直接试用 `main` 分支，遇到问题就提 Issue —— 我会让 AI 第一时间跟进修改 👻
+> - 本项目根据原 [SubsTracker](https://github.com/wangwangit/SubsTracker) 从于自己需要各希望的样式修改，感谢[@wangwangit](https://github.com/wangwangit/SubsTracker) 大佬的辛勤付出，给我们分享简洁、美观、便捷的 SubsTracker 项目
 
 ![image](https://github.com/user-attachments/assets/22ff1592-7836-4f73-aa13-24e9d43d7064)
 
@@ -230,22 +228,6 @@ npm run deploy:safe
 
 ---
 
-## 欢迎关注我的公众号
-
-![39d8d5a902fa1eee6cbbbc8a0dcff4b](https://github.com/user-attachments/assets/96bae085-4299-4377-9958-9a3a11294efc)
-
----
-
-## 赞助
-
-本项目 CDN 加速及安全防护由 Tencent EdgeOne 赞助：EdgeOne 提供长期有效的免费套餐，包含不限量流量和请求，覆盖中国大陆节点，且无超额收费。
-
-[[Best Asian CDN, Edge, and Secure Solutions - Tencent EdgeOne](https://edgeone.ai/?from=github)]
-
-[![image](https://edgeone.ai/media/34fe3a45-492d-4ea4-ae5d-ea1087ca7b4b.png)](https://edgeone.ai/media/34fe3a45-492d-4ea4-ae5d-ea1087ca7b4b.png)
-
----
-
 ## 🤝 贡献
 
 欢迎贡献代码、报告问题或提出新功能建议。
@@ -254,6 +236,3 @@ npm run deploy:safe
 
 MIT License
 
-## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=wangwangit/SubsTracker&type=Date)](https://www.star-history.com/#wangwangit/SubsTracker&Date)
