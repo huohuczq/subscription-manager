@@ -1,4 +1,4 @@
-# subscription-manager - 订阅管理与提醒系统
+# Subscription Manager - 订阅管理与提醒系统
 
 基于 Cloudflare Workers 的轻量级订阅管理系统，帮助你轻松跟踪各类订阅服务的到期时间，并通过 Telegram、Webhook 等多渠道发送及时提醒。
 
