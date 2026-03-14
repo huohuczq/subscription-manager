@@ -11,7 +11,8 @@ const SECRET_FIELDS = [
   'RESEND_API_KEY',
   'BARK_DEVICE_KEY',
   'THIRD_PARTY_API_TOKEN',
-  'GOTIFY_APP_TOKEN'
+  'GOTIFY_APP_TOKEN',
+  'BACKUP_SECRET_KEY' // 新增备份密钥
 ];
 
 function isConfiguredSecret(value) {
@@ -43,20 +44,12 @@ function normalizeClearSecretFields(value) {
 }
 
 function mergeSecretField(existingConfig, newConfig, key, clearSecretFields = []) {
-  // 显式清空优先级最高
   if (clearSecretFields.includes(key)) return '';
-
   const incoming = newConfig?.[key];
   if (typeof incoming !== 'string') return existingConfig?.[key] || '';
-
   const trimmed = incoming.trim();
-
-  // 兼容旧前端：曾用 "********" 作为占位符，表示不修改
   if (trimmed === '********') return existingConfig?.[key] || '';
-
-  // 安全默认：空字符串不再代表清空（避免前端未回显导致误清空）
   if (!trimmed) return existingConfig?.[key] || '';
-
   return trimmed;
 }
 
@@ -112,6 +105,7 @@ async function handleUpdateConfig(request, env) {
       TIMEZONE: newConfig.TIMEZONE || config.TIMEZONE || 'UTC',
 
       THIRD_PARTY_API_TOKEN: mergeSecretField(config, newConfig, 'THIRD_PARTY_API_TOKEN', clearSecretFields),
+      BACKUP_SECRET_KEY: mergeSecretField(config, newConfig, 'BACKUP_SECRET_KEY', clearSecretFields),
 
       DEBUG_LOGS: newConfig.DEBUG_LOGS === true,
       PAYMENT_HISTORY_LIMIT: Number.isFinite(Number(newConfig.PAYMENT_HISTORY_LIMIT))

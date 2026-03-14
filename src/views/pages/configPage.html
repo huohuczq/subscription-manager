@@ -9,15 +9,22 @@
   ${themeResources} 
   <style>
     .config-section { border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin-bottom: 24px; }
-    .config-section.active { background-color: #f8fafc; border-color: #6366f1; }
-    .config-section.inactive { background-color: #f9fafb; opacity: 0.7; }
     .config-section.base-box { background-color: #f9fafb; opacity: 1; }
     html.dark .config-section { border-color: #374151; }
-    html.dark .config-section.active { background-color: rgba(31, 41, 55, 0.5); border-color: #818cf8; }
-    html.dark .config-section.inactive { background-color: #111827; opacity: 0.5; }
     html.dark .config-section.base-box { background-color: rgba(31, 41, 55, 0.5); }
     html.dark .bg-indigo-50 { background-color: rgba(55, 65, 81, 0.5) !important; border-color: #4b5563 !important; }
     html.dark .text-indigo-700 { color: #a5b4fc !important; }
+    
+    /* 渠道卡片样式 */
+    .channel-card { transition: all 0.2s ease; border: 2px solid transparent; }
+    .channel-card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+    .channel-card.active { border-color: #6366f1; background-color: #eef2ff; }
+    html.dark .channel-card { background-color: #1f2937; border-color: #374151; }
+    html.dark .channel-card.active { border-color: #818cf8; background-color: rgba(55, 65, 81, 0.8); }
+    
+    /* 拨动开关样式 */
+    .toggle-checkbox:checked + .toggle-bg { background-color: #4f46e5; }
+    .toggle-checkbox:checked + .toggle-bg + .dot { transform: translateX(1.25rem); }
   </style>
 </head>
 <body class="bg-gray-100 min-h-screen">
@@ -26,56 +33,59 @@
   
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     
-    <div class="flex justify-between items-center mb-6 px-1">
-      <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">系统配置</h2>
-      </div>
+    <div class="flex flex-wrap items-center justify-between gap-4 mb-6 px-1">
+      <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 whitespace-nowrap shrink-0 mb-0">系统配置</h2>
+      <button type="button" id="openDataManagementBtn" class="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center shrink-0 whitespace-nowrap shadow-md transform hover:-translate-y-0.5 transition-all duration-200">
+        <i class="fas fa-database mr-2"></i>数据管理
+      </button>
+    </div>
     
-    <div class="bg-white rounded-lg shadow-md p-6">
+    <div class="bg-white rounded-lg shadow-md p-6 dark:bg-gray-800">
       <form id="configForm">
         <div class="grid grid-cols-1 lg:grid-cols-3" style="gap: 24px; margin-bottom: 24px;">
           
           <div class="config-section base-box" style="margin-bottom: 0;">
-            <h3 class="text-lg font-medium text-gray-900 mb-4">管理员账户</h3>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">管理员账户</h3>
             <div class="space-y-5">
               <div>
-                <label for="adminUsername" class="block text-sm font-medium text-gray-700">用户名</label>
-                <input type="text" id="adminUsername" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                <label for="adminUsername" class="block text-sm font-medium text-gray-700 dark:text-gray-300">用户名</label>
+                <input type="text" id="adminUsername" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
               </div>
               <div>
-                <label for="adminPassword" class="block text-sm font-medium text-gray-700">密码</label>
-                <input type="password" id="adminPassword" placeholder="如不修改，请留空" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                <p class="mt-1 text-sm text-gray-500">留空表示不修改当前密码</p>
+                <label for="adminPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300">密码</label>
+                <input type="password" id="adminPassword" placeholder="如不修改，请留空" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">留空表示不修改当前密码</p>
               </div>
             </div>
           </div>
           
           <div class="config-section base-box" style="margin-bottom: 0;">
-            <h3 class="text-lg font-medium text-gray-900 mb-4">显示设置</h3>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">显示设置</h3>
             <div class="space-y-5">
               <div>
-                <label for="themeModeSelect" class="block text-sm font-medium text-gray-700 mb-1">主题模式</label>
-                <select id="themeModeSelect" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white sm:text-sm">
+                <label for="themeModeSelect" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">主题模式</label>
+                <select id="themeModeSelect" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                   <option value="light">🌞 浅色模式</option>
                   <option value="dark">🌙 暗黑模式</option>
                   <option value="system">🖥️ 跟随系统</option>
                 </select>
-                <p class="mt-1 text-sm text-gray-500">选择系统的外观风格</p>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">选择系统的外观风格</p>
               </div>
               <div>
-                <label class="inline-flex items-center mt-2">
-                  <input type="checkbox" id="showLunarGlobal" class="form-checkbox h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500" checked>
-                  <span class="ml-2 text-sm text-gray-700">在通知中显示农历日期</span>
+                <label class="inline-flex items-center mt-2 cursor-pointer">
+                  <input type="checkbox" id="showLunarGlobal" class="form-checkbox h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600" checked>
+                  <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">在通知中显示农历日期</span>
                 </label>
-                <p class="mt-1 text-sm text-gray-500">控制是否在通知消息中包含农历</p>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">控制是否在通知消息中包含农历</p>
               </div>
             </div>
           </div>
 
           <div class="config-section base-box" style="margin-bottom: 0;">
-            <h3 class="text-lg font-medium text-gray-900 mb-4">时区设置</h3>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">时区设置</h3>
             <div>
-              <label for="timezone" class="block text-sm font-medium text-gray-700 mb-1">时区选择</label>
-              <select id="timezone" name="timezone" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white">
+              <label for="timezone" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">时区选择</label>
+              <select id="timezone" name="timezone" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                 <option value="UTC">世界标准时间（UTC+0）</option>
                 <option value="Asia/Shanghai">中国标准时间（UTC+8）</option>
                 <option value="Asia/Hong_Kong">香港时间（UTC+8）</option>
@@ -95,347 +105,516 @@
                 <option value="Australia/Melbourne">墨尔本时间（UTC+10）</option>
                 <option value="Pacific/Auckland">奥克兰时间（UTC+12）</option>
               </select>
-              <p class="mt-2 text-sm text-gray-500 leading-relaxed">系统全局业务时区。前端剩余天数显示、后端的到期自动续费以及每日定时提醒通知，都将严格以此时区（如北京时间 0 点）为基准执行。</p>
+              <p class="mt-2 text-sm text-gray-500 dark:text-gray-400 leading-relaxed">系统全局业务时区。前端剩余天数显示、后端的到期自动续费以及每日定时提醒通知，都将严格以此时区（如北京时间 0 点）为基准执行。</p>
             </div>
           </div>
         </div>
         
         <div class="config-section base-box">
-          <h3 class="text-lg font-medium text-gray-900 mb-4">通知设置</h3>
+          <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">通知设置</h3>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <div>
-            <label for="notificationHours" class="block text-sm font-medium text-gray-700">通知时段</label>
-            <input type="text" id="notificationHours" placeholder="例如：08, 12, 20 或输入 * 表示全天"
-              class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-            <p class="mt-1 text-sm text-gray-500">可输入多个小时，使用逗号或空格分隔；留空则默认每天执行一次任务即可</p>
-          </div>
-          <div class="bg-indigo-50 border border-indigo-100 rounded-md p-3 text-sm text-indigo-700">
-            <p class="font-medium mb-1">提示</p>
-            <p>后台将根据上方配置的【时区】来判断通知时段。示例：若时区为北京时间，希望早上 8 点收到通知，请直接填写 <code>08</code>。</p>
-            <p class="mt-1">若 Cloudflare Cron 已设置为每小时触发，可用该字段限制实际发送提醒的具体小时段。</p>
-          </div>
-          </div>
-          <div class="mb-6">
-            <label class="block text-sm font-medium text-gray-700 mb-3">通知方式（可多选）</label>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <label class="inline-flex items-center">
-                <input type="checkbox" name="enabledNotifiers" value="telegram" class="form-checkbox h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
-                <span class="ml-2 text-sm text-gray-700">Telegram</span>
-              </label>
-              <label class="inline-flex items-center">
-                <input type="checkbox" name="enabledNotifiers" value="notifyx" class="form-checkbox h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500" checked>
-                <span class="ml-2 text-sm text-gray-700 font-semibold">NotifyX</span>
-              </label>
-              <label class="inline-flex items-center">
-                <input type="checkbox" name="enabledNotifiers" value="webhook" class="form-checkbox h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
-                <span class="ml-2 text-sm text-gray-700">Webhook 通知</span>
-              </label>
-              <label class="inline-flex items-center">
-                <input type="checkbox" name="enabledNotifiers" value="wechatbot" class="form-checkbox h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
-                <span class="ml-2 text-sm text-gray-700">企业微信机器人</span>
-              </label>
-              <label class="inline-flex items-center">
-                <input type="checkbox" name="enabledNotifiers" value="email" class="form-checkbox h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
-                <span class="ml-2 text-sm text-gray-700">邮件通知</span>
-              </label>
-              <label class="inline-flex items-center">
-                <input type="checkbox" name="enabledNotifiers" value="bark" class="form-checkbox h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
-                <span class="ml-2 text-sm text-gray-700">Bark</span>
-              </label>
-              <label class="inline-flex items-center">
-                <input type="checkbox" name="enabledNotifiers" value="gotify" class="form-checkbox h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
-                <span class="ml-2 text-sm text-gray-700">Gotify</span>
-              </label>
+            <div>
+              <label for="notificationHours" class="block text-sm font-medium text-gray-700 dark:text-gray-300">通知时段</label>
+              <input type="text" id="notificationHours" placeholder="例如：08, 12, 20 或输入 * 表示全天"
+                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+              <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">可输入多个小时，使用逗号或空格分隔；留空则默认每天执行一次任务</p>
             </div>
-            <div class="mt-2 flex flex-wrap gap-4">
-              <a href="https://www.notifyx.cn/" target="_blank" class="text-indigo-600 hover:text-indigo-800 text-sm">
-                <i class="fas fa-external-link-alt ml-1"></i> NotifyX官网
-              </a>
-              <a href="https://webhook.site" target="_blank" class="text-indigo-600 hover:text-indigo-800 text-sm">
-                <i class="fas fa-external-link-alt ml-1"></i> Webhook 调试工具
-              </a>
-              <a href="https://developer.work.weixin.qq.com/document/path/91770" target="_blank" class="text-indigo-600 hover:text-indigo-800 text-sm">
-                <i class="fas fa-external-link-alt ml-1"></i> 企业微信机器人文档
-              </a>
-              <a href="https://developers.cloudflare.com/workers/tutorials/send-emails-with-resend/" target="_blank" class="text-indigo-600 hover:text-indigo-800 text-sm">
-                <i class="fas fa-external-link-alt ml-1"></i> 获取 Resend API Key
-              </a>
-              <a href="https://apps.apple.com/cn/app/bark-customed-notifications/id1403753865" target="_blank" class="text-indigo-600 hover:text-indigo-800 text-sm">
-                <i class="fas fa-external-link-alt ml-1"></i> Bark iOS应用
-              </a>
+            <div class="bg-indigo-50 border border-indigo-100 rounded-md p-3 text-sm text-indigo-700 flex items-start">
+              <i class="fas fa-info-circle mt-0.5 mr-2"></i>
+              <p>后台将根据上方配置的【时区】来判断通知时段。示例：若时区为北京时间，希望早上 8 点收到通知，请直接填写 <code>08</code>。</p>
             </div>
           </div>
-
+          
           <div class="mb-6">
-            <label for="thirdPartyToken" class="block text-sm font-medium text-gray-700">第三方 API 访问令牌</label>
+            <label for="thirdPartyToken" class="block text-sm font-medium text-gray-700 dark:text-gray-300">第三方 API 访问令牌</label>
             <div class="mt-1 flex flex-col sm:flex-row sm:items-center gap-3">
               <input type="text" id="thirdPartyToken" placeholder="留空表示不修改；输入新值将更新"
-                class="flex-1 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-              <button type="button" id="generateThirdPartyToken" class="btn-info text-white px-4 py-2 rounded-md text-sm font-medium whitespace-nowrap">
+                class="flex-1 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+              <button type="button" id="generateThirdPartyToken" class="btn-info text-white px-4 py-2 rounded-md text-sm font-medium whitespace-nowrap transition-colors">
                 <i class="fas fa-magic mr-2"></i>生成令牌
               </button>
-              <button type="button" id="clearThirdPartyToken" class="btn-warning text-white px-4 py-2 rounded-md text-sm font-medium whitespace-nowrap">
+              <button type="button" id="clearThirdPartyToken" class="btn-warning text-white px-4 py-2 rounded-md text-sm font-medium whitespace-nowrap transition-colors">
                 <i class="fas fa-eraser mr-2"></i>清空
               </button>
             </div>
-            <p id="THIRD_PARTY_API_TOKENStatus" class="mt-1 text-xs text-gray-500">加载中...</p>
-            <p class="mt-1 text-sm text-gray-500">调用 /api/notify/{token} 接口时需携带此令牌；留空表示禁用第三方 API 推送。</p>
+            <p id="THIRD_PARTY_API_TOKENStatus" class="mt-1 text-xs text-gray-500 dark:text-gray-400">加载中...</p>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">调用 /api/notify/{token} 接口时需携带此令牌；留空表示禁用第三方 API 推送。</p>
           </div>
 
-          <div class="mb-6">
-            <label class="block text-sm font-medium text-gray-700 mb-3">调试设置</label>
-            <label class="inline-flex items-center cursor-pointer select-none">
-              <input type="checkbox" id="debugLogs" class="form-checkbox h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
-              <span class="ml-2 text-sm text-gray-700">开启调试日志（影响控制台输出）</span>
-            </label>
-          </div>
-
-          <div class="mb-2">
-            <label for="paymentHistoryLimit" class="block text-sm font-medium text-gray-700">支付历史保留条数</label>
-            <input type="number" id="paymentHistoryLimit" min="10" max="1000" step="1"
-              class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-              placeholder="默认 100">
-            <p class="mt-1 text-sm text-gray-500">自动续订与手动续订后仅保留最近 N 条支付历史（建议 50~200，默认 100）。</p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="paymentHistoryLimit" class="block text-sm font-medium text-gray-700 dark:text-gray-300">支付历史保留条数</label>
+              <input type="number" id="paymentHistoryLimit" min="10" max="1000" step="1"
+                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                placeholder="默认 100">
+              <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">自动与手动续订后仅保留最近 N 条历史（建议 50~200）。</p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">调试设置</label>
+              <label class="inline-flex items-center cursor-pointer select-none">
+                <input type="checkbox" id="debugLogs" class="form-checkbox h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600">
+                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">开启系统调试日志（影响控制台输出）</span>
+              </label>
+            </div>
           </div>
         </div>
+
+        <div class="config-section base-box">
+          <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">渠道设置</h3>
           
-        <div id="telegramConfig" class="config-section">
-          <h4 class="text-md font-medium text-gray-900 mb-3">Telegram 配置</h4>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div>
-              <label for="tgBotToken" class="block text-sm font-medium text-gray-700">Bot Token</label>
-              <div class="mt-1 flex flex-col sm:flex-row sm:items-center gap-3">
-                <input type="text" id="tgBotToken" placeholder="留空表示不修改；输入新值将更新" class="flex-1 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                <button type="button" id="clearTgBotToken" class="btn-warning text-white px-4 py-2 rounded-md text-sm font-medium whitespace-nowrap">
-                  <i class="fas fa-eraser mr-2"></i>清空
-                </button>
-              </div>
-              <p id="TG_BOT_TOKENStatus" class="mt-1 text-xs text-gray-500">加载中...</p>
+          <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 mb-6" id="channelCardsGrid">
+            
+            <div class="channel-card active cursor-pointer bg-white rounded-lg p-3 flex flex-col items-center justify-center border-gray-200" data-target="telegramConfig">
+              <i class="fab fa-telegram text-blue-500 text-3xl mb-2"></i>
+              <span class="text-sm font-medium text-gray-800 dark:text-gray-200">Telegram</span>
+              <span class="channel-status mt-1 text-xs text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full">加载中</span>
             </div>
-            <div>
-              <label for="tgChatId" class="block text-sm font-medium text-gray-700">Chat ID</label>
-              <input type="text" id="tgChatId" placeholder="可从 @userinfobot 获取" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+            
+            <div class="channel-card cursor-pointer bg-white rounded-lg p-3 flex flex-col items-center justify-center border-gray-200" data-target="notifyxConfig">
+              <i class="fas fa-bolt text-yellow-500 text-3xl mb-2"></i>
+              <span class="text-sm font-medium text-gray-800 dark:text-gray-200">NotifyX</span>
+              <span class="channel-status mt-1 text-xs text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full">加载中</span>
             </div>
-          </div>
-          <div class="flex justify-end">
-            <button type="button" id="testTelegramBtn" class="btn-secondary text-white px-4 py-2 rounded-md text-sm font-medium">
-              <i class="fas fa-paper-plane mr-2"></i>测试 Telegram 通知
-            </button>
-          </div>
-        </div>
-        
-        <div id="notifyxConfig" class="config-section">
-          <h4 class="text-md font-medium text-gray-900 mb-3">NotifyX 配置</h4>
-          <div class="mb-4">
-            <label for="notifyxApiKey" class="block text-sm font-medium text-gray-700">API Key</label>
-            <div class="mt-1 flex flex-col sm:flex-row sm:items-center gap-3">
-              <input type="text" id="notifyxApiKey" placeholder="留空表示不修改；输入新值将更新" class="flex-1 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-              <button type="button" id="clearNotifyxApiKey" class="btn-warning text-white px-4 py-2 rounded-md text-sm font-medium whitespace-nowrap">
-                <i class="fas fa-eraser mr-2"></i>清空
-              </button>
-            </div>
-            <p id="NOTIFYX_API_KEYStatus" class="mt-1 text-xs text-gray-500">加载中...</p>
-            <p class="mt-1 text-sm text-gray-500">从 <a href="https://www.notifyx.cn/" target="_blank" class="text-indigo-600 hover:text-indigo-800">NotifyX平台</a> 获取的 API Key</p>
-          </div>
-          <div class="flex justify-end">
-            <button type="button" id="testNotifyXBtn" class="btn-secondary text-white px-4 py-2 rounded-md text-sm font-medium">
-              <i class="fas fa-paper-plane mr-2"></i>测试 NotifyX 通知
-            </button>
-          </div>
-        </div>
 
-        <div id="webhookConfig" class="config-section">
-          <h4 class="text-md font-medium text-gray-900 mb-3">Webhook 通知 配置</h4>
-          <div class="grid grid-cols-1 gap-4 mb-4">
-            <div>
-              <label for="webhookUrl" class="block text-sm font-medium text-gray-700">Webhook 通知 URL</label>
-              <div class="mt-1 flex flex-col sm:flex-row sm:items-center gap-3">
-                <input type="url" id="webhookUrl" placeholder="留空表示不修改；输入新值将更新" class="flex-1 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                <button type="button" id="clearWebhookUrl" class="btn-warning text-white px-4 py-2 rounded-md text-sm font-medium whitespace-nowrap">
-                  <i class="fas fa-eraser mr-2"></i>清空
-                </button>
-              </div>
-              <p id="WEBHOOK_URLStatus" class="mt-1 text-xs text-gray-500">加载中...</p>
-              <p class="mt-1 text-sm text-gray-500">请填写自建服务或第三方平台提供的 Webhook 地址，例如 <code>https://your-webhook-endpoint.com/path</code></p>
+            <div class="channel-card cursor-pointer bg-white rounded-lg p-3 flex flex-col items-center justify-center border-gray-200" data-target="webhookConfig">
+              <i class="fas fa-link text-gray-500 text-3xl mb-2"></i>
+              <span class="text-sm font-medium text-gray-800 dark:text-gray-200">Webhook</span>
+              <span class="channel-status mt-1 text-xs text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full">加载中</span>
             </div>
-            <div>
-              <label for="webhookMethod" class="block text-sm font-medium text-gray-700">请求方法</label>
-              <select id="webhookMethod" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                <option value="POST">POST</option>
-                <option value="GET">GET</option>
-                <option value="PUT">PUT</option>
-              </select>
-            </div>
-            <div>
-              <label for="webhookHeaders" class="block text-sm font-medium text-gray-700">自定义请求头 (JSON格式，可选)</label>
-              <div class="mt-1 flex flex-col sm:flex-row sm:items-start gap-3">
-                <textarea id="webhookHeaders" rows="3" placeholder='留空表示不修改；输入新值将更新' class="flex-1 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
-                <button type="button" id="clearWebhookHeaders" class="btn-warning text-white px-4 py-2 rounded-md text-sm font-medium whitespace-nowrap">
-                  <i class="fas fa-eraser mr-2"></i>清空
-                </button>
-              </div>
-              <p id="WEBHOOK_HEADERSStatus" class="mt-1 text-xs text-gray-500">加载中...</p>
-              <p class="mt-1 text-sm text-gray-500">JSON格式的自定义请求头，留空使用默认</p>
-            </div>
-            <div>
-              <label for="webhookTemplate" class="block text-sm font-medium text-gray-700">消息模板 (JSON格式，可选)</label>
-              <textarea id="webhookTemplate" rows="4" placeholder='{"title": "{{title}}", "content": "{{content}}", "timestamp": "{{timestamp}}"}' class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
-              <p class="mt-1 text-sm text-gray-500">支持变量: {{title}}, {{content}}, {{timestamp}}。留空使用默认格式</p>
-            </div>
-          </div>
-          <div class="flex justify-end">
-            <button type="button" id="testWebhookBtn" class="btn-secondary text-white px-4 py-2 rounded-md text-sm font-medium">
-              <i class="fas fa-paper-plane mr-2"></i>测试 Webhook 通知
-            </button>
-          </div>
-        </div>
 
-        <div id="wechatbotConfig" class="config-section">
-          <h4 class="text-md font-medium text-gray-900 mb-3">企业微信机器人 配置</h4>
-          <div class="grid grid-cols-1 gap-4 mb-4">
-            <div>
-              <label for="wechatbotWebhook" class="block text-sm font-medium text-gray-700">机器人 Webhook URL</label>
-              <div class="mt-1 flex flex-col sm:flex-row sm:items-center gap-3">
-                <input type="url" id="wechatbotWebhook" placeholder="留空表示不修改；输入新值将更新" class="flex-1 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                <button type="button" id="clearWechatbotWebhook" class="btn-warning text-white px-4 py-2 rounded-md text-sm font-medium whitespace-nowrap">
-                  <i class="fas fa-eraser mr-2"></i>清空
-                </button>
-              </div>
-              <p id="WECHATBOT_WEBHOOKStatus" class="mt-1 text-xs text-gray-500">加载中...</p>
-              <p class="mt-1 text-sm text-gray-500">从企业微信群聊中添加机器人获取的 Webhook URL</p>
+            <div class="channel-card cursor-pointer bg-white rounded-lg p-3 flex flex-col items-center justify-center border-gray-200" data-target="wechatbotConfig">
+              <i class="fab fa-weixin text-green-500 text-3xl mb-2"></i>
+              <span class="text-sm font-medium text-gray-800 dark:text-gray-200">企业微信</span>
+              <span class="channel-status mt-1 text-xs text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full">加载中</span>
             </div>
-            <div>
-              <label for="wechatbotMsgType" class="block text-sm font-medium text-gray-700">消息类型</label>
-              <select id="wechatbotMsgType" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                <option value="text">文本消息</option>
-                <option value="markdown">Markdown消息</option>
-              </select>
-              <p class="mt-1 text-sm text-gray-500">选择发送的消息格式类型</p>
-            </div>
-            <div>
-              <label for="wechatbotAtMobiles" class="block text-sm font-medium text-gray-700">@手机号 (可选)</label>
-              <input type="text" id="wechatbotAtMobiles" placeholder="13800138000,13900139000" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-              <p class="mt-1 text-sm text-gray-500">需要@的手机号，多个用逗号分隔，留空则不@任何人</p>
-            </div>
-            <div>
-              <label for="wechatbotAtAll" class="block text-sm font-medium text-gray-700 mb-2">@所有人</label>
-              <label class="inline-flex items-center">
-                <input type="checkbox" id="wechatbotAtAll" class="form-checkbox h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
-                <span class="ml-2 text-sm text-gray-700">发送消息时@所有人</span>
-              </label>
-            </div>
-          </div>
-          <div class="flex justify-end">
-            <button type="button" id="testWechatBotBtn" class="btn-secondary text-white px-4 py-2 rounded-md text-sm font-medium">
-              <i class="fas fa-paper-plane mr-2"></i>测试 企业微信机器人
-            </button>
-          </div>
-        </div>
 
-        <div id="emailConfig" class="config-section">
-          <h4 class="text-md font-medium text-gray-900 mb-3">邮件通知 配置</h4>
-          <div class="grid grid-cols-1 gap-4 mb-4">
-            <div>
-              <label for="resendApiKey" class="block text-sm font-medium text-gray-700">Resend API Key</label>
-              <div class="mt-1 flex flex-col sm:flex-row sm:items-center gap-3">
-                <input type="text" id="resendApiKey" placeholder="留空表示不修改；输入新值将更新" class="flex-1 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                <button type="button" id="clearResendApiKey" class="btn-warning text-white px-4 py-2 rounded-md text-sm font-medium whitespace-nowrap">
-                  <i class="fas fa-eraser mr-2"></i>清空
-                </button>
-              </div>
-              <p id="RESEND_API_KEYStatus" class="mt-1 text-xs text-gray-500">加载中...</p>
-              <p class="mt-1 text-sm text-gray-500">从 <a href="https://resend.com/api-keys" target="_blank" class="text-indigo-600 hover:text-indigo-800">Resend控制台</a> 获取的 API Key</p>
+            <div class="channel-card cursor-pointer bg-white rounded-lg p-3 flex flex-col items-center justify-center border-gray-200" data-target="emailConfig">
+              <i class="fas fa-envelope text-red-500 text-3xl mb-2"></i>
+              <span class="text-sm font-medium text-gray-800 dark:text-gray-200">邮件通知</span>
+              <span class="channel-status mt-1 text-xs text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full">加载中</span>
             </div>
-            <div>
-              <label for="emailFrom" class="block text-sm font-medium text-gray-700">发件人邮箱</label>
-              <input type="email" id="emailFrom" placeholder="noreply@yourdomain.com" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-              <p class="mt-1 text-sm text-gray-500">必须是已在Resend验证的域名邮箱</p>
-            </div>
-            <div>
-              <label for="emailFromName" class="block text-sm font-medium text-gray-700">发件人名称</label>
-              <input type="text" id="emailFromName" placeholder="订阅提醒系统" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-              <p class="mt-1 text-sm text-gray-500">显示在邮件中的发件人名称</p>
-            </div>
-            <div>
-              <label for="emailTo" class="block text-sm font-medium text-gray-700">收件人邮箱</label>
-              <input type="email" id="emailTo" placeholder="user@example.com" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-              <p class="mt-1 text-sm text-gray-500">接收通知邮件的邮箱地址</p>
-            </div>
-          </div>
-          <div class="flex justify-end">
-            <button type="button" id="testEmailBtn" class="btn-secondary text-white px-4 py-2 rounded-md text-sm font-medium">
-              <i class="fas fa-paper-plane mr-2"></i>测试 邮件通知
-            </button>
-          </div>
-        </div>
 
-        <div id="barkConfig" class="config-section">
-          <h4 class="text-md font-medium text-gray-900 mb-3">Bark 配置</h4>
-          <div class="grid grid-cols-1 gap-4 mb-4">
-            <div>
-              <label for="barkServer" class="block text-sm font-medium text-gray-700">服务器地址</label>
-              <input type="url" id="barkServer" placeholder="https://api.day.app" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-              <p class="mt-1 text-sm text-gray-500">Bark 服务器地址，默认为官方服务器，也可以使用自建服务器</p>
+            <div class="channel-card cursor-pointer bg-white rounded-lg p-3 flex flex-col items-center justify-center border-gray-200" data-target="barkConfig">
+              <i class="fas fa-mobile-alt text-purple-500 text-3xl mb-2"></i>
+              <span class="text-sm font-medium text-gray-800 dark:text-gray-200">Bark</span>
+              <span class="channel-status mt-1 text-xs text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full">加载中</span>
             </div>
-            <div>
-              <label for="barkDeviceKey" class="block text-sm font-medium text-gray-700">设备Key</label>
-              <div class="mt-1 flex flex-col sm:flex-row sm:items-center gap-3">
-                <input type="text" id="barkDeviceKey" placeholder="留空表示不修改；输入新值将更新" class="flex-1 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                <button type="button" id="clearBarkDeviceKey" class="btn-warning text-white px-4 py-2 rounded-md text-sm font-medium whitespace-nowrap">
-                  <i class="fas fa-eraser mr-2"></i>清空
-                </button>
-              </div>
-              <p id="BARK_DEVICE_KEYStatus" class="mt-1 text-xs text-gray-500">加载中...</p>
-              <p class="mt-1 text-sm text-gray-500">从 <a href="https://apps.apple.com/cn/app/bark-customed-notifications/id1403753865" target="_blank" class="text-indigo-600 hover:text-indigo-800">Bark iOS 应用</a> 中获取的设备Key</p>
-            </div>
-            <div>
-              <label for="barkIsArchive" class="block text-sm font-medium text-gray-700 mb-2">保存推送</label>
-              <label class="inline-flex items-center">
-                <input type="checkbox" id="barkIsArchive" class="form-checkbox h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
-                <span class="ml-2 text-sm text-gray-700">保存推送到历史记录</span>
-              </label>
-              <p class="mt-1 text-sm text-gray-500">勾选后推送消息会保存到 Bark 的历史记录中</p>
-            </div>
-          </div>
-          <div class="flex justify-end">
-            <button type="button" id="testBarkBtn" class="btn-secondary text-white px-4 py-2 rounded-md text-sm font-medium">
-              <i class="fas fa-paper-plane mr-2"></i>测试 Bark 通知
-            </button>
-          </div>
-        </div>
 
-        <div id="gotifyConfig" class="config-section">
-          <h4 class="text-md font-medium text-gray-900 mb-3">Gotify 配置</h4>
-          <div class="grid grid-cols-1 gap-4 mb-4">
-            <div>
-              <label for="gotifyServerUrl" class="block text-sm font-medium text-gray-700">Server URL</label>
-              <input type="url" id="gotifyServerUrl" placeholder="https://gotify.example.com" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-              <p class="mt-1 text-sm text-gray-500">你的 Gotify 服务地址（不需要带 /message）。</p>
-            </div>
-            <div>
-              <label for="gotifyAppToken" class="block text-sm font-medium text-gray-700">Application Token</label>
-              <div class="mt-1 flex flex-col sm:flex-row sm:items-center gap-3">
-                <input type="text" id="gotifyAppToken" placeholder="留空表示不修改；输入新值将更新" class="flex-1 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                <button type="button" id="clearGotifyAppToken" class="btn-warning text-white px-4 py-2 rounded-md text-sm font-medium whitespace-nowrap">
-                  <i class="fas fa-eraser mr-2"></i>清空
-                </button>
-              </div>
-              <p id="GOTIFY_APP_TOKENStatus" class="mt-1 text-xs text-gray-500">加载中...</p>
+            <div class="channel-card cursor-pointer bg-white rounded-lg p-3 flex flex-col items-center justify-center border-gray-200" data-target="gotifyConfig">
+              <i class="fas fa-bell text-indigo-400 text-3xl mb-2"></i>
+              <span class="text-sm font-medium text-gray-800 dark:text-gray-200">Gotify</span>
+              <span class="channel-status mt-1 text-xs text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full">加载中</span>
             </div>
           </div>
-          <div class="flex justify-end">
-            <button type="button" id="testGotifyBtn" class="btn-secondary text-white px-4 py-2 rounded-md text-sm font-medium">
-              <i class="fas fa-paper-plane mr-2"></i>测试 Gotify 通知
-            </button>
+
+          <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm overflow-hidden">
+            
+            <div id="telegramConfig" class="channel-panel p-5">
+              <div class="flex justify-between items-center mb-5 border-b border-gray-200 dark:border-gray-700 pb-3">
+                <div>
+                  <h4 class="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center">
+                    <i class="fab fa-telegram text-blue-500 mr-2"></i> Telegram 配置
+                  </h4>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">通过 Telegram 机器人接收消息通知</p>
+                </div>
+                <label class="flex items-center cursor-pointer">
+                  <span class="mr-3 text-sm font-medium text-gray-700 dark:text-gray-300">启用渠道</span>
+                  <div class="relative">
+                    <input type="checkbox" name="enabledNotifiers" value="telegram" class="sr-only toggle-checkbox">
+                    <div class="block bg-gray-300 dark:bg-gray-600 w-12 h-7 rounded-full toggle-bg transition-colors duration-300"></div>
+                    <div class="dot absolute left-1 top-1 bg-white w-5 h-5 rounded-full transition-transform duration-300 shadow"></div>
+                  </div>
+                </label>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label for="tgBotToken" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Bot Token</label>
+                  <div class="mt-1 flex flex-col sm:flex-row sm:items-center gap-3">
+                    <input type="text" id="tgBotToken" placeholder="留空表示不修改；输入新值将更新" class="flex-1 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    <button type="button" id="clearTgBotToken" class="btn-warning text-white px-4 py-2 rounded-md text-sm font-medium whitespace-nowrap transition-colors">
+                      <i class="fas fa-eraser mr-2"></i>清空
+                    </button>
+                  </div>
+                  <p id="TG_BOT_TOKENStatus" class="mt-1 text-xs text-gray-500 dark:text-gray-400">加载中...</p>
+                </div>
+                <div>
+                  <label for="tgChatId" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Chat ID</label>
+                  <input type="text" id="tgChatId" placeholder="可从 @userinfobot 获取" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                </div>
+              </div>
+              <div class="flex justify-between items-center mt-6 bg-gray-50 dark:bg-gray-700/50 p-3 rounded-md border border-gray-100 dark:border-gray-600">
+                <div class="text-sm text-gray-500 dark:text-gray-400">请确保 Bot 已启动且配置了正确的 Chat ID</div>
+                <button type="button" id="testTelegramBtn" class="bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-500 px-4 py-2 rounded-md text-sm font-medium shadow-sm transition-colors">
+                  <i class="fas fa-paper-plane mr-2 text-blue-500"></i>发送测试
+                </button>
+              </div>
+            </div>
+
+            <div id="notifyxConfig" class="channel-panel hidden p-5">
+              <div class="flex justify-between items-center mb-5 border-b border-gray-200 dark:border-gray-700 pb-3">
+                <div>
+                  <h4 class="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center">
+                    <i class="fas fa-bolt text-yellow-500 mr-2"></i> NotifyX 配置
+                  </h4>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">通过 NotifyX 平台进行多渠道分发</p>
+                </div>
+                <label class="flex items-center cursor-pointer">
+                  <span class="mr-3 text-sm font-medium text-gray-700 dark:text-gray-300">启用渠道</span>
+                  <div class="relative">
+                    <input type="checkbox" name="enabledNotifiers" value="notifyx" class="sr-only toggle-checkbox">
+                    <div class="block bg-gray-300 dark:bg-gray-600 w-12 h-7 rounded-full toggle-bg transition-colors duration-300"></div>
+                    <div class="dot absolute left-1 top-1 bg-white w-5 h-5 rounded-full transition-transform duration-300 shadow"></div>
+                  </div>
+                </label>
+              </div>
+              <div class="mb-4">
+                <label for="notifyxApiKey" class="block text-sm font-medium text-gray-700 dark:text-gray-300">API Key</label>
+                <div class="mt-1 flex flex-col sm:flex-row sm:items-center gap-3">
+                  <input type="text" id="notifyxApiKey" placeholder="留空表示不修改；输入新值将更新" class="flex-1 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                  <button type="button" id="clearNotifyxApiKey" class="btn-warning text-white px-4 py-2 rounded-md text-sm font-medium whitespace-nowrap transition-colors">
+                    <i class="fas fa-eraser mr-2"></i>清空
+                  </button>
+                </div>
+                <p id="NOTIFYX_API_KEYStatus" class="mt-1 text-xs text-gray-500 dark:text-gray-400">加载中...</p>
+              </div>
+              <div class="flex justify-between items-center mt-6 bg-gray-50 dark:bg-gray-700/50 p-3 rounded-md border border-gray-100 dark:border-gray-600">
+                <a href="https://www.notifyx.cn/" target="_blank" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">
+                  <i class="fas fa-external-link-alt mr-1"></i> 前往 NotifyX 官网获取 Key
+                </a>
+                <button type="button" id="testNotifyXBtn" class="bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-500 px-4 py-2 rounded-md text-sm font-medium shadow-sm transition-colors">
+                  <i class="fas fa-paper-plane mr-2 text-yellow-500"></i>发送测试
+                </button>
+              </div>
+            </div>
+
+            <div id="webhookConfig" class="channel-panel hidden p-5">
+              <div class="flex justify-between items-center mb-5 border-b border-gray-200 dark:border-gray-700 pb-3">
+                <div>
+                  <h4 class="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center">
+                    <i class="fas fa-link text-gray-500 mr-2"></i> Webhook 配置
+                  </h4>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">高度可定制的通用 Webhook 接口推送</p>
+                </div>
+                <label class="flex items-center cursor-pointer">
+                  <span class="mr-3 text-sm font-medium text-gray-700 dark:text-gray-300">启用渠道</span>
+                  <div class="relative">
+                    <input type="checkbox" name="enabledNotifiers" value="webhook" class="sr-only toggle-checkbox">
+                    <div class="block bg-gray-300 dark:bg-gray-600 w-12 h-7 rounded-full toggle-bg transition-colors duration-300"></div>
+                    <div class="dot absolute left-1 top-1 bg-white w-5 h-5 rounded-full transition-transform duration-300 shadow"></div>
+                  </div>
+                </label>
+              </div>
+              <div class="grid grid-cols-1 gap-4 mb-4">
+                <div>
+                  <label for="webhookUrl" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Webhook URL</label>
+                  <div class="mt-1 flex flex-col sm:flex-row sm:items-center gap-3">
+                    <input type="url" id="webhookUrl" placeholder="留空表示不修改；输入新值将更新" class="flex-1 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    <button type="button" id="clearWebhookUrl" class="btn-warning text-white px-4 py-2 rounded-md text-sm font-medium whitespace-nowrap transition-colors">
+                      <i class="fas fa-eraser mr-2"></i>清空
+                    </button>
+                  </div>
+                  <p id="WEBHOOK_URLStatus" class="mt-1 text-xs text-gray-500 dark:text-gray-400">加载中...</p>
+                </div>
+                <div>
+                  <label for="webhookMethod" class="block text-sm font-medium text-gray-700 dark:text-gray-300">请求方法</label>
+                  <select id="webhookMethod" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    <option value="POST">POST</option>
+                    <option value="GET">GET</option>
+                    <option value="PUT">PUT</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="webhookHeaders" class="block text-sm font-medium text-gray-700 dark:text-gray-300">自定义 Header (JSON)</label>
+                  <textarea id="webhookHeaders" rows="2" placeholder='{"Authorization": "Bearer token"}' class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"></textarea>
+                  <p id="WEBHOOK_HEADERSStatus" class="mt-1 text-xs text-gray-500 dark:text-gray-400">加载中...</p>
+                </div>
+                <div>
+                  <label for="webhookTemplate" class="block text-sm font-medium text-gray-700 dark:text-gray-300">消息模板 (JSON)</label>
+                  <textarea id="webhookTemplate" rows="3" placeholder='{"title": "{{title}}", "content": "{{content}}", "timestamp": "{{timestamp}}"}' class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"></textarea>
+                </div>
+              </div>
+              <div class="flex justify-between items-center mt-6 bg-gray-50 dark:bg-gray-700/50 p-3 rounded-md border border-gray-100 dark:border-gray-600">
+                <a href="https://webhook.site" target="_blank" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">
+                  <i class="fas fa-external-link-alt mr-1"></i> Webhook 调试工具
+                </a>
+                <button type="button" id="testWebhookBtn" class="bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-500 px-4 py-2 rounded-md text-sm font-medium shadow-sm transition-colors">
+                  <i class="fas fa-paper-plane mr-2 text-gray-500"></i>发送测试
+                </button>
+              </div>
+            </div>
+
+            <div id="wechatbotConfig" class="channel-panel hidden p-5">
+              <div class="flex justify-between items-center mb-5 border-b border-gray-200 dark:border-gray-700 pb-3">
+                <div>
+                  <h4 class="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center">
+                    <i class="fab fa-weixin text-green-500 mr-2"></i> 企业微信配置
+                  </h4>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">推送到企业微信内部群机器人</p>
+                </div>
+                <label class="flex items-center cursor-pointer">
+                  <span class="mr-3 text-sm font-medium text-gray-700 dark:text-gray-300">启用渠道</span>
+                  <div class="relative">
+                    <input type="checkbox" name="enabledNotifiers" value="wechatbot" class="sr-only toggle-checkbox">
+                    <div class="block bg-gray-300 dark:bg-gray-600 w-12 h-7 rounded-full toggle-bg transition-colors duration-300"></div>
+                    <div class="dot absolute left-1 top-1 bg-white w-5 h-5 rounded-full transition-transform duration-300 shadow"></div>
+                  </div>
+                </label>
+              </div>
+              <div class="grid grid-cols-1 gap-4 mb-4">
+                <div>
+                  <label for="wechatbotWebhook" class="block text-sm font-medium text-gray-700 dark:text-gray-300">机器人 Webhook URL</label>
+                  <div class="mt-1 flex flex-col sm:flex-row sm:items-center gap-3">
+                    <input type="url" id="wechatbotWebhook" placeholder="留空表示不修改；输入新值将更新" class="flex-1 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    <button type="button" id="clearWechatbotWebhook" class="btn-warning text-white px-4 py-2 rounded-md text-sm font-medium whitespace-nowrap transition-colors">
+                      <i class="fas fa-eraser mr-2"></i>清空
+                    </button>
+                  </div>
+                  <p id="WECHATBOT_WEBHOOKStatus" class="mt-1 text-xs text-gray-500 dark:text-gray-400">加载中...</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label for="wechatbotMsgType" class="block text-sm font-medium text-gray-700 dark:text-gray-300">消息类型</label>
+                    <select id="wechatbotMsgType" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                      <option value="text">文本消息</option>
+                      <option value="markdown">Markdown消息</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label for="wechatbotAtMobiles" class="block text-sm font-medium text-gray-700 dark:text-gray-300">@手机号 (逗号分隔)</label>
+                    <input type="text" id="wechatbotAtMobiles" placeholder="如: 13800138000" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                  </div>
+                </div>
+                <div>
+                  <label class="inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="wechatbotAtAll" class="form-checkbox h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600">
+                    <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">发送消息时@所有人</span>
+                  </label>
+                </div>
+              </div>
+              <div class="flex justify-between items-center mt-6 bg-gray-50 dark:bg-gray-700/50 p-3 rounded-md border border-gray-100 dark:border-gray-600">
+                <a href="https://developer.work.weixin.qq.com/document/path/91770" target="_blank" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">
+                  <i class="fas fa-external-link-alt mr-1"></i> 企微机器人文档
+                </a>
+                <button type="button" id="testWechatBotBtn" class="bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-500 px-4 py-2 rounded-md text-sm font-medium shadow-sm transition-colors">
+                  <i class="fas fa-paper-plane mr-2 text-green-500"></i>发送测试
+                </button>
+              </div>
+            </div>
+
+            <div id="emailConfig" class="channel-panel hidden p-5">
+              <div class="flex justify-between items-center mb-5 border-b border-gray-200 dark:border-gray-700 pb-3">
+                <div>
+                  <h4 class="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center">
+                    <i class="fas fa-envelope text-red-500 mr-2"></i> 邮件通知配置
+                  </h4>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">使用 Resend API 发送精美的 HTML 邮件</p>
+                </div>
+                <label class="flex items-center cursor-pointer">
+                  <span class="mr-3 text-sm font-medium text-gray-700 dark:text-gray-300">启用渠道</span>
+                  <div class="relative">
+                    <input type="checkbox" name="enabledNotifiers" value="email" class="sr-only toggle-checkbox">
+                    <div class="block bg-gray-300 dark:bg-gray-600 w-12 h-7 rounded-full toggle-bg transition-colors duration-300"></div>
+                    <div class="dot absolute left-1 top-1 bg-white w-5 h-5 rounded-full transition-transform duration-300 shadow"></div>
+                  </div>
+                </label>
+              </div>
+              <div class="grid grid-cols-1 gap-4 mb-4">
+                <div>
+                  <label for="resendApiKey" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Resend API Key</label>
+                  <div class="mt-1 flex flex-col sm:flex-row sm:items-center gap-3">
+                    <input type="text" id="resendApiKey" placeholder="留空表示不修改；输入新值将更新" class="flex-1 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    <button type="button" id="clearResendApiKey" class="btn-warning text-white px-4 py-2 rounded-md text-sm font-medium whitespace-nowrap transition-colors">
+                      <i class="fas fa-eraser mr-2"></i>清空
+                    </button>
+                  </div>
+                  <p id="RESEND_API_KEYStatus" class="mt-1 text-xs text-gray-500 dark:text-gray-400">加载中...</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label for="emailFrom" class="block text-sm font-medium text-gray-700 dark:text-gray-300">发件人邮箱</label>
+                    <input type="email" id="emailFrom" placeholder="noreply@yourdomain.com" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                  </div>
+                  <div>
+                    <label for="emailFromName" class="block text-sm font-medium text-gray-700 dark:text-gray-300">发件人名称</label>
+                    <input type="text" id="emailFromName" placeholder="订阅提醒系统" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                  </div>
+                </div>
+                <div>
+                  <label for="emailTo" class="block text-sm font-medium text-gray-700 dark:text-gray-300">收件人邮箱</label>
+                  <input type="email" id="emailTo" placeholder="user@example.com" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                </div>
+              </div>
+              <div class="flex justify-between items-center mt-6 bg-gray-50 dark:bg-gray-700/50 p-3 rounded-md border border-gray-100 dark:border-gray-600">
+                <a href="https://resend.com/api-keys" target="_blank" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">
+                  <i class="fas fa-external-link-alt mr-1"></i> 获取 Resend API Key
+                </a>
+                <button type="button" id="testEmailBtn" class="bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-500 px-4 py-2 rounded-md text-sm font-medium shadow-sm transition-colors">
+                  <i class="fas fa-paper-plane mr-2 text-red-500"></i>发送测试
+                </button>
+              </div>
+            </div>
+
+            <div id="barkConfig" class="channel-panel hidden p-5">
+              <div class="flex justify-between items-center mb-5 border-b border-gray-200 dark:border-gray-700 pb-3">
+                <div>
+                  <h4 class="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center">
+                    <i class="fas fa-mobile-alt text-purple-500 mr-2"></i> Bark 配置
+                  </h4>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">推送到 Apple 设备的轻量级通知工具</p>
+                </div>
+                <label class="flex items-center cursor-pointer">
+                  <span class="mr-3 text-sm font-medium text-gray-700 dark:text-gray-300">启用渠道</span>
+                  <div class="relative">
+                    <input type="checkbox" name="enabledNotifiers" value="bark" class="sr-only toggle-checkbox">
+                    <div class="block bg-gray-300 dark:bg-gray-600 w-12 h-7 rounded-full toggle-bg transition-colors duration-300"></div>
+                    <div class="dot absolute left-1 top-1 bg-white w-5 h-5 rounded-full transition-transform duration-300 shadow"></div>
+                  </div>
+                </label>
+              </div>
+              <div class="grid grid-cols-1 gap-4 mb-4">
+                <div>
+                  <label for="barkServer" class="block text-sm font-medium text-gray-700 dark:text-gray-300">服务器地址</label>
+                  <input type="url" id="barkServer" placeholder="https://api.day.app" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                </div>
+                <div>
+                  <label for="barkDeviceKey" class="block text-sm font-medium text-gray-700 dark:text-gray-300">设备 Key</label>
+                  <div class="mt-1 flex flex-col sm:flex-row sm:items-center gap-3">
+                    <input type="text" id="barkDeviceKey" placeholder="留空表示不修改；输入新值将更新" class="flex-1 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    <button type="button" id="clearBarkDeviceKey" class="btn-warning text-white px-4 py-2 rounded-md text-sm font-medium whitespace-nowrap transition-colors">
+                      <i class="fas fa-eraser mr-2"></i>清空
+                    </button>
+                  </div>
+                  <p id="BARK_DEVICE_KEYStatus" class="mt-1 text-xs text-gray-500 dark:text-gray-400">加载中...</p>
+                </div>
+                <div>
+                  <label class="inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="barkIsArchive" class="form-checkbox h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600">
+                    <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">保存推送到历史记录</span>
+                  </label>
+                </div>
+              </div>
+              <div class="flex justify-between items-center mt-6 bg-gray-50 dark:bg-gray-700/50 p-3 rounded-md border border-gray-100 dark:border-gray-600">
+                <a href="https://apps.apple.com/cn/app/bark-customed-notifications/id1403753865" target="_blank" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">
+                  <i class="fas fa-external-link-alt mr-1"></i> 获取 Bark App
+                </a>
+                <button type="button" id="testBarkBtn" class="bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-500 px-4 py-2 rounded-md text-sm font-medium shadow-sm transition-colors">
+                  <i class="fas fa-paper-plane mr-2 text-purple-500"></i>发送测试
+                </button>
+              </div>
+            </div>
+
+            <div id="gotifyConfig" class="channel-panel hidden p-5">
+              <div class="flex justify-between items-center mb-5 border-b border-gray-200 dark:border-gray-700 pb-3">
+                <div>
+                  <h4 class="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center">
+                    <i class="fas fa-bell text-indigo-400 mr-2"></i> Gotify 配置
+                  </h4>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">自托管消息推送服务</p>
+                </div>
+                <label class="flex items-center cursor-pointer">
+                  <span class="mr-3 text-sm font-medium text-gray-700 dark:text-gray-300">启用渠道</span>
+                  <div class="relative">
+                    <input type="checkbox" name="enabledNotifiers" value="gotify" class="sr-only toggle-checkbox">
+                    <div class="block bg-gray-300 dark:bg-gray-600 w-12 h-7 rounded-full toggle-bg transition-colors duration-300"></div>
+                    <div class="dot absolute left-1 top-1 bg-white w-5 h-5 rounded-full transition-transform duration-300 shadow"></div>
+                  </div>
+                </label>
+              </div>
+              <div class="grid grid-cols-1 gap-4 mb-4">
+                <div>
+                  <label for="gotifyServerUrl" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Server URL</label>
+                  <input type="url" id="gotifyServerUrl" placeholder="https://gotify.example.com" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                </div>
+                <div>
+                  <label for="gotifyAppToken" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Application Token</label>
+                  <div class="mt-1 flex flex-col sm:flex-row sm:items-center gap-3">
+                    <input type="text" id="gotifyAppToken" placeholder="留空表示不修改；输入新值将更新" class="flex-1 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    <button type="button" id="clearGotifyAppToken" class="btn-warning text-white px-4 py-2 rounded-md text-sm font-medium whitespace-nowrap transition-colors">
+                      <i class="fas fa-eraser mr-2"></i>清空
+                    </button>
+                  </div>
+                  <p id="GOTIFY_APP_TOKENStatus" class="mt-1 text-xs text-gray-500 dark:text-gray-400">加载中...</p>
+                </div>
+              </div>
+              <div class="flex justify-between items-center mt-6 bg-gray-50 dark:bg-gray-700/50 p-3 rounded-md border border-gray-100 dark:border-gray-600">
+                <div class="text-sm text-gray-500 dark:text-gray-400">请确保 Gotify 服务可达</div>
+                <button type="button" id="testGotifyBtn" class="bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-500 px-4 py-2 rounded-md text-sm font-medium shadow-sm transition-colors">
+                  <i class="fas fa-paper-plane mr-2 text-indigo-400"></i>发送测试
+                </button>
+              </div>
+            </div>
+
           </div>
         </div>
 
         <div class="flex justify-end mt-6">
-          <button type="submit" class="btn-primary text-white px-6 py-2 rounded-md text-sm font-medium">
+          <button type="submit" class="btn-primary text-white px-6 py-2 rounded-md text-sm font-medium transition-colors">
             <i class="fas fa-save mr-2"></i>保存配置
           </button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <div id="dataManagementModal" class="fixed inset-0 hidden overflow-y-auto bg-gray-900 bg-opacity-50 flex items-center justify-center p-4" style="z-index: 9999; backdrop-filter: blur(4px);">
+    <div class="relative w-full max-w-xl bg-white dark:bg-gray-800 rounded-lg shadow-2xl overflow-hidden transform transition-all">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
+        <h3 class="text-base font-medium text-gray-900 dark:text-gray-100"><i class="fas fa-database mr-2 text-indigo-500"></i>数据管理</h3>
+        <button id="closeDataManagementModalBtn" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+          <i class="fas fa-times text-lg"></i>
+        </button>
+      </div>
+      <div class="p-6 space-y-5">
+        <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-gray-800 shadow-sm hover:shadow-md transition-shadow">
+          <label for="backupSecretKey" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">备份密钥</label>
+          <div class="relative flex items-center">
+             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="fas fa-lock text-gray-400"></i>
+             </div>
+             <input type="text" id="backupSecretKey" placeholder="至少8位 (留空不启用)" class="block w-full pl-10 pr-24 py-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+             <div class="absolute inset-y-0 right-0 flex items-center pr-2">
+                <button type="button" id="generateBackupKey" class="p-1.5 text-gray-400 hover:text-indigo-600 transition-colors" title="随机生成">
+                   <i class="fas fa-sync-alt"></i>
+                </button>
+                <button type="button" id="clearBackupKey" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors" title="清空">
+                   <i class="fas fa-eraser"></i>
+                </button>
+             </div>
+          </div>
+          <p id="BACKUP_SECRET_KEYStatus" class="mt-1 text-xs text-indigo-500 dark:text-indigo-400"></p>
+          <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">用于 <code>/api/backup</code> 接口的专用访问密钥，配置后可替代 JWT Token 使用。</p>
+        </div>
+
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-gray-800 shadow-sm hover:shadow-md transition-shadow gap-3">
+          <div>
+            <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100">导出备份</h4>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">导出所有数据和配置为 JSON 文件（不含密钥凭证）</p>
+          </div>
+          <button type="button" id="exportBackupBtn" class="flex justify-center items-center px-4 py-2 border border-green-500 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-md text-sm font-medium transition-colors whitespace-nowrap w-full sm:w-auto">
+            <i class="fas fa-download mr-1.5"></i> 导出
+          </button>
+        </div>
+
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-gray-800 shadow-sm hover:shadow-md transition-shadow gap-3">
+          <div>
+            <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100">恢复备份</h4>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">从之前导出的 JSON 文件中全量恢复数据</p>
+          </div>
+          <button type="button" id="importBackupBtn" class="flex justify-center items-center px-4 py-2 border border-orange-400 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/30 rounded-md text-sm font-medium transition-colors whitespace-nowrap w-full sm:w-auto">
+            <i class="fas fa-upload mr-1.5"></i> 导入
+          </button>
+          <input type="file" id="importBackupInput" accept=".json" class="hidden">
+        </div>
+      </div>
+      
+      <div class="bg-gray-50 dark:bg-gray-900/50 px-5 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+         <button type="button" id="cancelDataManagementModalBtn" class="px-6 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors shadow-sm mr-3">
+            取消
+         </button>
+         <button type="button" id="saveDataManagementModalBtn" class="btn-primary text-white px-6 py-2 rounded-md text-sm font-medium transition-colors">
+            保存设置
+         </button>
+      </div>
     </div>
   </div>
 
@@ -460,6 +639,7 @@
         setSecretStatus('BARK_DEVICE_KEY', cfg.BARK_DEVICE_KEY ? '已配置（已隐藏）' : '未配置');
         setSecretStatus('THIRD_PARTY_API_TOKEN', cfg.THIRD_PARTY_API_TOKEN ? '已配置（已隐藏）' : '未配置');
         setSecretStatus('GOTIFY_APP_TOKEN', cfg.GOTIFY_APP_TOKEN ? '已配置（已隐藏）' : '未配置');
+        setSecretStatus('BACKUP_SECRET_KEY', cfg.BACKUP_SECRET_KEY ? '已配置（已隐藏）' : '未配置');
       }
 
       function wireSecretInput(inputId, key) {
@@ -469,7 +649,7 @@
           const value = input.value.trim();
           if (value.length > 0) {
             CLEAR_SECRET_FIELDS.delete(key);
-            setSecretStatus(key, '将更新（保存后生效）');
+            setSecretStatus(key, '将更新（保存配置后生效）');
           } else {
             const cfg = window.SECRET_CONFIGURED || {};
             setSecretStatus(key, cfg[key] ? '已配置（已隐藏）' : '未配置');
@@ -484,9 +664,9 @@
         btn.addEventListener('click', () => {
           input.value = '';
           CLEAR_SECRET_FIELDS.add(key);
-          setSecretStatus(key, '将清空（保存后生效）');
+          setSecretStatus(key, '将清空（保存配置后生效）');
           if (typeof window.showToast === 'function') {
-            window.showToast('已标记清空：' + key + '（点击“保存配置”后生效）', 'warning', 4500);
+            window.showToast('已标记清空：' + key + '（请点击“保存配置”生效）', 'warning', 4500);
           }
         });
       }
@@ -521,6 +701,7 @@
           document.getElementById('barkDeviceKey').value = '';
           document.getElementById('thirdPartyToken').value = '';
           document.getElementById('gotifyAppToken').value = '';
+          document.getElementById('backupSecretKey').value = '';
 
           window.SECRET_CONFIGURED = {
             TG_BOT_TOKEN: config.TG_BOT_TOKEN_CONFIGURED === true,
@@ -531,7 +712,8 @@
             RESEND_API_KEY: config.RESEND_API_KEY_CONFIGURED === true,
             BARK_DEVICE_KEY: config.BARK_DEVICE_KEY_CONFIGURED === true,
             THIRD_PARTY_API_TOKEN: config.THIRD_PARTY_API_TOKEN_CONFIGURED === true,
-            GOTIFY_APP_TOKEN: config.GOTIFY_APP_TOKEN_CONFIGURED === true
+            GOTIFY_APP_TOKEN: config.GOTIFY_APP_TOKEN_CONFIGURED === true,
+            BACKUP_SECRET_KEY: config.BACKUP_SECRET_KEY_CONFIGURED === true
           };
 
           updateAllSecretStatus();
@@ -547,12 +729,13 @@
           document.getElementById('showLunarGlobal').checked = config.SHOW_LUNAR === true;
           generateTimezoneOptions(config.TIMEZONE || 'UTC');
 
-          const enabledNotifiers = config.ENABLED_NOTIFIERS || ['notifyx'];
+          const enabledNotifiers = config.ENABLED_NOTIFIERS || ['telegram'];
           document.querySelectorAll('input[name="enabledNotifiers"]').forEach(checkbox => {
             checkbox.checked = enabledNotifiers.includes(checkbox.value);
           });
+          
+          updateChannelCardStatuses();
 
-          toggleNotificationConfigs(enabledNotifiers);
         } catch (error) {
           console.error('加载配置失败:', error);
           if (typeof window.showToast === 'function') window.showToast('加载配置失败，请刷新页面重试', 'error');
@@ -593,41 +776,44 @@
 
         const timezoneExists = timezones.some(tz => tz.value === selectedTimezone);
         timezoneSelect.value = timezoneExists ? selectedTimezone : fallbackTimezone;
-
-        if (!timezoneExists) {
-          if (typeof window.showToast === 'function') window.showToast('检测到未知时区配置，已回退为 UTC，请重新确认后保存', 'warning', 4500);
-        }
       }
+
+      // ========= 卡片与拨动开关核心逻辑 =========
       
-      function toggleNotificationConfigs(enabledNotifiers) {
-        const configs = [
-          'telegramConfig', 'notifyxConfig', 'webhookConfig', 
-          'wechatbotConfig', 'emailConfig', 'barkConfig', 'gotifyConfig'
-        ].map(id => document.getElementById(id));
-
-        configs.forEach(config => {
-          if (config) {
-            config.classList.remove('active', 'inactive');
-            config.classList.add('inactive');
-          }
-        });
-
-        enabledNotifiers.forEach(type => {
-          const activeConfig = document.getElementById(type + 'Config');
-          if (activeConfig) {
-            activeConfig.classList.remove('inactive');
-            activeConfig.classList.add('active');
+      function updateChannelCardStatuses() {
+        document.querySelectorAll('input[name="enabledNotifiers"]').forEach(checkbox => {
+          const val = checkbox.value;
+          const cardStatus = document.querySelector(`.channel-card[data-target="${val}Config"] .channel-status`);
+          if (cardStatus) {
+            if (checkbox.checked) {
+              cardStatus.textContent = '已启用';
+              cardStatus.className = 'channel-status mt-1 text-xs text-green-600 bg-green-100 dark:bg-green-900/40 dark:text-green-400 px-2 py-0.5 rounded-full';
+            } else {
+              cardStatus.textContent = '未启用';
+              cardStatus.className = 'channel-status mt-1 text-xs text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full';
+            }
           }
         });
       }
 
       document.querySelectorAll('input[name="enabledNotifiers"]').forEach(checkbox => {
-        checkbox.addEventListener('change', () => {
-          const enabledNotifiers = Array.from(document.querySelectorAll('input[name="enabledNotifiers"]:checked'))
-            .map(cb => cb.value);
-          toggleNotificationConfigs(enabledNotifiers);
+        checkbox.addEventListener('change', updateChannelCardStatuses);
+      });
+
+      document.querySelectorAll('.channel-card').forEach(card => {
+        card.addEventListener('click', () => {
+          document.querySelectorAll('.channel-card').forEach(c => {
+            c.classList.remove('active');
+          });
+          card.classList.add('active');
+
+          document.querySelectorAll('.channel-panel').forEach(p => p.classList.add('hidden'));
+          const targetId = card.getAttribute('data-target');
+          document.getElementById(targetId).classList.remove('hidden');
         });
       });
+      
+      // ==========================================
       
       document.getElementById('configForm').addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -636,7 +822,7 @@
           .map(cb => cb.value);
 
         if (enabledNotifiers.length === 0) {
-          if (typeof window.showToast === 'function') window.showToast('请至少选择一种通知方式', 'warning');
+          if (typeof window.showToast === 'function') window.showToast('请至少启用一种通知渠道！', 'warning');
           return;
         }
 
@@ -652,6 +838,7 @@
           BARK_DEVICE_KEY: document.getElementById('barkDeviceKey').value.trim(),
           THIRD_PARTY_API_TOKEN: document.getElementById('thirdPartyToken').value.trim(),
           GOTIFY_APP_TOKEN: document.getElementById('gotifyAppToken').value.trim(),
+          BACKUP_SECRET_KEY: document.getElementById('backupSecretKey').value.trim(),
           TG_CHAT_ID: document.getElementById('tgChatId').value.trim(),
           WEBHOOK_METHOD: document.getElementById('webhookMethod').value,
           WEBHOOK_TEMPLATE: document.getElementById('webhookTemplate').value.trim(),
@@ -686,7 +873,7 @@
           config.ADMIN_PASSWORD = passwordField.value.trim();
         }
 
-        const submitButton = e.target.querySelector('button[type="submit"]');
+        const submitButton = document.querySelector('#configForm button[type="submit"]');
         const originalContent = submitButton.innerHTML;
         submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>保存中...';
         submitButton.disabled = true;
@@ -701,12 +888,12 @@
           const result = await response.json();
 
           if (result.success) {
-            if (typeof window.showToast === 'function') window.showToast('配置保存成功', 'success');
+            if (typeof window.showToast === 'function') window.showToast('全局配置保存成功', 'success');
             if (window.updateAppTheme) window.updateAppTheme(config.THEME_MODE);
             passwordField.value = '';
             
             if (window.location.pathname === '/admin') {
-              window.location.reload();
+              setTimeout(() => { window.location.reload(); }, 500);
             }
           } else {
             if (typeof window.showToast === 'function') window.showToast('配置保存失败: ' + (result.message || '未知错误'), 'error');
@@ -721,124 +908,212 @@
       });
       
       async function testNotification(type) {
-        const buttonId = type === 'telegram' ? 'testTelegramBtn' :
-                        type === 'notifyx' ? 'testNotifyXBtn' :
-                        type === 'wechatbot' ? 'testWechatBotBtn' :
-                        type === 'email' ? 'testEmailBtn' :
-                        type === 'bark' ? 'testBarkBtn' :
-                        type === 'gotify' ? 'testGotifyBtn' : 'testWebhookBtn';
-        const button = document.getElementById(buttonId);
-        if (!button) {
-          if (typeof window.showToast === 'function') window.showToast('测试按钮不存在，请刷新页面后重试', 'error');
-          return;
-        }
-        const originalContent = button.innerHTML;
-        const serviceName = type === 'telegram' ? 'Telegram' :
-                            type === 'notifyx' ? 'NotifyX' :
-                            type === 'wechatbot' ? '企业微信机器人' :
-                            type === 'email' ? '邮件通知' :
-                            type === 'bark' ? 'Bark' :
-                            type === 'gotify' ? 'Gotify' : 'Webhook 通知';
+         try {
+            const originalContent = event.target.innerHTML;
+            event.target.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>发送中...';
+            event.target.disabled = true;
 
-        button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>测试中...';
-        button.disabled = true;
+            const config = {
+              type: type,
+              TG_BOT_TOKEN: document.getElementById('tgBotToken').value.trim(),
+              TG_CHAT_ID: document.getElementById('tgChatId').value.trim(),
+              NOTIFYX_API_KEY: document.getElementById('notifyxApiKey').value.trim(),
+              WEBHOOK_URL: document.getElementById('webhookUrl').value.trim(),
+              WEBHOOK_METHOD: document.getElementById('webhookMethod').value,
+              WEBHOOK_HEADERS: document.getElementById('webhookHeaders').value.trim(),
+              WEBHOOK_TEMPLATE: document.getElementById('webhookTemplate').value.trim(),
+              WECHATBOT_WEBHOOK: document.getElementById('wechatbotWebhook').value.trim(),
+              WECHATBOT_MSG_TYPE: document.getElementById('wechatbotMsgType').value,
+              WECHATBOT_AT_MOBILES: document.getElementById('wechatbotAtMobiles').value.trim(),
+              WECHATBOT_AT_ALL: document.getElementById('wechatbotAtAll').checked.toString(),
+              RESEND_API_KEY: document.getElementById('resendApiKey').value.trim(),
+              EMAIL_FROM: document.getElementById('emailFrom').value.trim(),
+              EMAIL_FROM_NAME: document.getElementById('emailFromName').value.trim(),
+              EMAIL_TO: document.getElementById('emailTo').value.trim(),
+              BARK_DEVICE_KEY: document.getElementById('barkDeviceKey').value.trim(),
+              BARK_SERVER: document.getElementById('barkServer').value.trim() || 'https://api.day.app',
+              BARK_IS_ARCHIVE: document.getElementById('barkIsArchive').checked.toString(),
+              GOTIFY_SERVER_URL: document.getElementById('gotifyServerUrl').value.trim(),
+              GOTIFY_APP_TOKEN: document.getElementById('gotifyAppToken').value.trim()
+            };
 
-        const config = {};
-        if (type === 'telegram') {
-          config.TG_CHAT_ID = document.getElementById('tgChatId').value.trim();
-          const token = document.getElementById('tgBotToken').value.trim();
-          if (token) config.TG_BOT_TOKEN = token;
-        } else if (type === 'notifyx') {
-          const key = document.getElementById('notifyxApiKey').value.trim();
-          if (key) config.NOTIFYX_API_KEY = key;
-        } else if (type === 'webhook') {
-          config.WEBHOOK_METHOD = document.getElementById('webhookMethod').value;
-          config.WEBHOOK_TEMPLATE = document.getElementById('webhookTemplate').value.trim();
-          const url = document.getElementById('webhookUrl').value.trim();
-          const headers = document.getElementById('webhookHeaders').value.trim();
-          if (url) config.WEBHOOK_URL = url;
-          if (headers) config.WEBHOOK_HEADERS = headers;
-        } else if (type === 'wechatbot') {
-          config.WECHATBOT_MSG_TYPE = document.getElementById('wechatbotMsgType').value;
-          config.WECHATBOT_AT_MOBILES = document.getElementById('wechatbotAtMobiles').value.trim();
-          config.WECHATBOT_AT_ALL = document.getElementById('wechatbotAtAll').checked.toString();
-          const url = document.getElementById('wechatbotWebhook').value.trim();
-          if (url) config.WECHATBOT_WEBHOOK = url;
-        } else if (type === 'email') {
-          const key = document.getElementById('resendApiKey').value.trim();
-          if (key) config.RESEND_API_KEY = key;
-          config.EMAIL_FROM = document.getElementById('emailFrom').value.trim();
-          config.EMAIL_FROM_NAME = document.getElementById('emailFromName').value.trim();
-          config.EMAIL_TO = document.getElementById('emailTo').value.trim();
-        } else if (type === 'bark') {
-          config.BARK_SERVER = document.getElementById('barkServer').value.trim() || 'https://api.day.app';
-          const key = document.getElementById('barkDeviceKey').value.trim();
-          if (key) config.BARK_DEVICE_KEY = key;
-          config.BARK_IS_ARCHIVE = document.getElementById('barkIsArchive').checked.toString();
-        } else if (type === 'gotify') {
-          config.GOTIFY_SERVER_URL = document.getElementById('gotifyServerUrl').value.trim();
-          const token = document.getElementById('gotifyAppToken').value.trim();
-          if (token) config.GOTIFY_APP_TOKEN = token;
+            const response = await fetch('/api/test-notification', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(config)
+            });
 
-          if (!config.GOTIFY_SERVER_URL) {
-            if (typeof window.showToast === 'function') window.showToast('请先填写 Gotify Server URL', 'warning');
-            button.innerHTML = originalContent;
-            button.disabled = false;
-            return;
+            const result = await response.json();
+            if (result.success) {
+              if (typeof window.showToast === 'function') window.showToast(result.message || '发送成功', 'success');
+            } else {
+              if (typeof window.showToast === 'function') window.showToast(result.message || '发送失败', 'error');
+            }
+          } catch (error) {
+            console.error('测试通知错误:', error);
+            if (typeof window.showToast === 'function') window.showToast('测试请求发生网络错误', 'error');
+          } finally {
+            if(event && event.target) {
+               event.target.innerHTML = `<i class="fas fa-paper-plane mr-2 ${event.target.dataset.color || 'text-gray-500'}"></i>发送测试`;
+               event.target.disabled = false;
+            }
           }
-        }
-
-        try {
-          const response = await fetch('/api/test-notification', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ type: type, ...config })
-          });
-
-          let result = null;
-          try {
-            result = await response.json();
-          } catch (_) {
-            result = { success: false, message: '服务返回了无法解析的响应' };
-          }
-
-          if (response.ok && result.success) {
-            if (typeof window.showToast === 'function') window.showToast(serviceName + ' 通知测试成功！', 'success');
-          } else {
-            const message = (result && result.message) ? result.message : ('HTTP ' + response.status);
-            if (typeof window.showToast === 'function') window.showToast(serviceName + ' 通知测试失败: ' + message, 'error', 4500);
-          }
-        } catch (error) {
-          console.error('测试通知失败:', error);
-          if (typeof window.showToast === 'function') window.showToast(serviceName + ' 测试失败，请检查网络后重试', 'error');
-        } finally {
-          button.innerHTML = originalContent;
-          button.disabled = false;
-        }
       }
       
-      document.getElementById('testTelegramBtn').addEventListener('click', () => testNotification('telegram'));
-      document.getElementById('testNotifyXBtn').addEventListener('click', () => testNotification('notifyx'));
-      document.getElementById('testWebhookBtn').addEventListener('click', () => testNotification('webhook'));
-      document.getElementById('testWechatBotBtn').addEventListener('click', () => testNotification('wechatbot'));
-      document.getElementById('testEmailBtn').addEventListener('click', () => testNotification('email'));
-      document.getElementById('testBarkBtn').addEventListener('click', () => testNotification('bark'));
-      document.getElementById('testGotifyBtn').addEventListener('click', () => testNotification('gotify'));
+      document.getElementById('testTelegramBtn').addEventListener('click', (e) => { e.target.dataset.color = 'text-blue-500'; testNotification('telegram'); });
+      document.getElementById('testNotifyXBtn').addEventListener('click', (e) => { e.target.dataset.color = 'text-yellow-500'; testNotification('notifyx'); });
+      document.getElementById('testWebhookBtn').addEventListener('click', (e) => { e.target.dataset.color = 'text-gray-500'; testNotification('webhook'); });
+      document.getElementById('testWechatBotBtn').addEventListener('click', (e) => { e.target.dataset.color = 'text-green-500'; testNotification('wechatbot'); });
+      document.getElementById('testEmailBtn').addEventListener('click', (e) => { e.target.dataset.color = 'text-red-500'; testNotification('email'); });
+      document.getElementById('testBarkBtn').addEventListener('click', (e) => { e.target.dataset.color = 'text-purple-500'; testNotification('bark'); });
+      document.getElementById('testGotifyBtn').addEventListener('click', (e) => { e.target.dataset.color = 'text-indigo-400'; testNotification('gotify'); });
+
+      function generateRandomString(length = 32) {
+        const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        const buffer = new Uint8Array(length);
+        window.crypto.getRandomValues(buffer);
+        return Array.from(buffer).map(v => charset[v % charset.length]).join('');
+      }
 
       document.getElementById('generateThirdPartyToken').addEventListener('click', () => {
         try {
-          const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-          const buffer = new Uint8Array(32);
-          window.crypto.getRandomValues(buffer);
-          const token = Array.from(buffer).map(v => charset[v % charset.length]).join('');
           const input = document.getElementById('thirdPartyToken');
-          input.value = token;
+          input.value = generateRandomString(32);
           input.dispatchEvent(new Event('input'));
           if (typeof window.showToast === 'function') window.showToast('已生成新的第三方 API 令牌，请保存配置后生效', 'info');
         } catch (error) {
-          console.error('生成令牌失败:', error);
           if (typeof window.showToast === 'function') window.showToast('生成令牌失败，请手动输入', 'error');
         }
+      });
+
+      // ========== 弹窗控制与数据管理核心交互 ==========
+
+      const dataModal = document.getElementById('dataManagementModal');
+      const openDataModalBtn = document.getElementById('openDataManagementBtn');
+      const closeDataModalBtn = document.getElementById('closeDataManagementModalBtn');
+      const cancelDataModalBtn = document.getElementById('cancelDataManagementModalBtn');
+      const saveDataModalBtn = document.getElementById('saveDataManagementModalBtn');
+
+      function openDataModal() {
+        dataModal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+      }
+
+      function closeDataModalFunc() {
+        dataModal.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+      }
+
+      openDataModalBtn.addEventListener('click', openDataModal);
+      closeDataModalBtn.addEventListener('click', closeDataModalFunc);
+      cancelDataModalBtn.addEventListener('click', closeDataModalFunc);
+
+      // 联动保存：在弹窗中点击保存，直接触发主表单的提交
+      saveDataModalBtn.addEventListener('click', () => {
+        const origHtml = saveDataModalBtn.innerHTML;
+        saveDataModalBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1.5"></i>保存中...';
+        saveDataModalBtn.disabled = true;
+
+        const mainSubmitBtn = document.querySelector('#configForm button[type="submit"]');
+        if (mainSubmitBtn) {
+          mainSubmitBtn.click();
+        }
+
+        setTimeout(() => {
+          saveDataModalBtn.innerHTML = origHtml;
+          saveDataModalBtn.disabled = false;
+          closeDataModalFunc();
+        }, 1500);
+      });
+
+      // 生成备份密钥
+      document.getElementById('generateBackupKey').addEventListener('click', () => {
+        try {
+          const input = document.getElementById('backupSecretKey');
+          input.value = generateRandomString(16);
+          input.dispatchEvent(new Event('input'));
+          if (typeof window.showToast === 'function') window.showToast('密钥已生成，请点击底部的【保存设置】生效', 'info', 3000);
+        } catch (error) {}
+      });
+
+      // 导出备份
+      document.getElementById('exportBackupBtn').addEventListener('click', async () => {
+        try {
+          const btn = document.getElementById('exportBackupBtn');
+          const origHtml = btn.innerHTML;
+          btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1.5"></i> 导出中...';
+          btn.disabled = true;
+
+          const res = await fetch('/api/backup');
+          if (!res.ok) throw new Error('接口请求失败 (HTTP ' + res.status + ')');
+          
+          const blob = await res.blob();
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `substracker_backup_${new Date().toISOString().split('T')[0]}.json`;
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+
+          if (typeof window.showToast === 'function') window.showToast('备份已成功导出', 'success');
+          
+          btn.innerHTML = origHtml;
+          btn.disabled = false;
+        } catch(e) {
+          if (typeof window.showToast === 'function') window.showToast('导出失败: ' + e.message, 'error');
+          document.getElementById('exportBackupBtn').innerHTML = '<i class="fas fa-download mr-1.5"></i> 导出';
+          document.getElementById('exportBackupBtn').disabled = false;
+        }
+      });
+
+      // 导入备份
+      document.getElementById('importBackupBtn').addEventListener('click', () => {
+        document.getElementById('importBackupInput').click();
+      });
+
+      document.getElementById('importBackupInput').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        if(!confirm('⚠️ 高危操作：导入备份将会完全覆盖你当前的【所有订阅数据】和【除账号密码外的所有配置】！\n\n确认导入吗？')) {
+            e.target.value = '';
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+          try {
+            const jsonText = event.target.result;
+            JSON.parse(jsonText); 
+
+            const btn = document.getElementById('importBackupBtn');
+            const origHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1.5"></i> 导入中...';
+            btn.disabled = true;
+
+            const res = await fetch('/api/backup', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: jsonText
+            });
+
+            const result = await res.json();
+            if (result.success) {
+              if (typeof window.showToast === 'function') window.showToast('🎉 数据恢复成功，系统即将刷新...', 'success', 3000);
+              setTimeout(() => window.location.reload(), 2000);
+            } else {
+              if (typeof window.showToast === 'function') window.showToast('恢复失败: ' + result.message, 'error');
+              btn.innerHTML = origHtml;
+              btn.disabled = false;
+            }
+          } catch(err) {
+            if (typeof window.showToast === 'function') window.showToast('导入失败：无效的 JSON 文件', 'error');
+          }
+          e.target.value = '';
+        };
+        reader.readAsText(file);
       });
 
       window.addEventListener('load', () => {
@@ -851,6 +1126,7 @@
         wireSecretInput('barkDeviceKey', 'BARK_DEVICE_KEY');
         wireSecretInput('thirdPartyToken', 'THIRD_PARTY_API_TOKEN');
         wireSecretInput('gotifyAppToken', 'GOTIFY_APP_TOKEN');
+        wireSecretInput('backupSecretKey', 'BACKUP_SECRET_KEY');
 
         wireClearSecretButton('clearTgBotToken', 'tgBotToken', 'TG_BOT_TOKEN');
         wireClearSecretButton('clearNotifyxApiKey', 'notifyxApiKey', 'NOTIFYX_API_KEY');
@@ -861,6 +1137,11 @@
         wireClearSecretButton('clearBarkDeviceKey', 'barkDeviceKey', 'BARK_DEVICE_KEY');
         wireClearSecretButton('clearThirdPartyToken', 'thirdPartyToken', 'THIRD_PARTY_API_TOKEN');
         wireClearSecretButton('clearGotifyAppToken', 'gotifyAppToken', 'GOTIFY_APP_TOKEN');
+        wireClearSecretButton('clearBackupKey', 'backupSecretKey', 'BACKUP_SECRET_KEY');
+
+        // 默认点亮 Telegram 标签页
+        const tgCard = document.querySelector('.channel-card[data-target="telegramConfig"]');
+        if(tgCard) tgCard.click();
 
         loadConfig();
       });

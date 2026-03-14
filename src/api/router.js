@@ -5,6 +5,7 @@ import { handleThirdPartyNotify } from './handlers/notify.js';
 import { handleSubscriptions } from './handlers/subscriptions.js';
 import { getConfig } from '../data/config.js';
 import { handleTestNotification } from './handlers/test-notification.js';
+import { handleBackupRequest } from './handlers/backup.js';
 
 async function handleApiRequest(request, env) {
   const url = new URL(request.url);
@@ -21,8 +22,21 @@ async function handleApiRequest(request, env) {
     return handleLogout();
   }
 
+  // 对 /backup 接口验证专门的备份密钥
+  let isBackupAuth = false;
+  if (path === '/backup') {
+    const tokenFromHeader = (request.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '').trim();
+    const tokenFromQuery = url.searchParams.get('token') || '';
+    const providedToken = tokenFromHeader || tokenFromQuery;
+    if (config.BACKUP_SECRET_KEY && providedToken === config.BACKUP_SECRET_KEY) {
+      isBackupAuth = true;
+    }
+  }
+
   const { user } = await getUserFromRequest(request, env);
-  if (!user && path !== '/login') {
+  
+  // 核心拦截：如果没有登录态，也没有合法的备份密钥，则拦截
+  if (!user && path !== '/login' && !isBackupAuth) {
     return new Response(
       JSON.stringify({ success: false, message: '未授权访问' }),
       { status: 401, headers: { 'Content-Type': 'application/json' } }
@@ -40,6 +54,11 @@ async function handleApiRequest(request, env) {
 
   if (path === '/test-notification' && method === 'POST') {
     return handleTestNotification(request, env);
+  }
+
+  // 挂载备份请求路由
+  if (path === '/backup') {
+    return handleBackupRequest(request, env);
   }
 
   const subscriptionResponse = await handleSubscriptions(request, env, path);
