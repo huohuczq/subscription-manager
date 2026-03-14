@@ -6,6 +6,16 @@ Subscription Manager 基于 [SubsTracker](https://github.com/wangwangit/SubsTrac
 
 感谢  [@wangwangit](https://github.com/wangwangit)  大佬辛勤付出和无私分享，为我们提供了简洁、美观、便捷的SubsTracker订阅管理系统
 
+
+<details>
+  <summary>点击查看项目截图</summary>
+  <img src="src/登录.jpeg" alt="项目截图" style="max-width:600px">
+  <img src="src/仪表盘.jpeg" alt="项目截图" style="max-width:600px">
+  <img src="src/订阅列表.jpeg" alt="项目截图" style="max-width:600px">
+  <img src="src/数据管理.png" alt="项目截图" style="max-width:600px">
+  <img src="src/系统配置.jpeg" alt="项目截图" style="max-width:600px">
+</details>
+
 ![image](https://github.com/user-attachments/assets/22ff1592-7836-4f73-aa13-24e9d43d7064)
 
 ---
