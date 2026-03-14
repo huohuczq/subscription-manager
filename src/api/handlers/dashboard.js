@@ -5,7 +5,9 @@ import { getCurrentTimeInTimezone, MS_PER_DAY } from '../../core/time.js';
 async function handleDashboardStats(env, config) {
   try {
     const subscriptions = await getAllSubscriptions(env);
-    const timezone = 'UTC';
+    
+    // 【关键修复】：不再写死 UTC，而是读取 config.js 中的配置
+    const timezone = config.TIMEZONE || 'UTC';
 
     let schedulerStatus = null;
     let schedulerStatusHistory = [];

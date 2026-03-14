@@ -44,8 +44,13 @@ async function checkExpiringSubscriptions(env) {
     const config = await getConfig(env);
     // 动态获取用户的时区设置
     const timezone = config.TIMEZONE || 'UTC';
+    
+    // 获取带时区偏移的当前时间，用于计算小时差
     const currentTime = getCurrentTimeInTimezone(timezone);
-    const todayMidnight = getTimezoneMidnightTimestamp(currentTime, timezone);
+    
+    // 【核心修复】：获取今日零点时，必须传入未经修改的原始 new Date()
+    // 防止已经被加过偏移的 currentTime 再次被加上时区偏移，导致下午执行时“今天”变成“明天”
+    const todayMidnight = getTimezoneMidnightTimestamp(new Date(), timezone);
 
     const subscriptions = await getAllSubscriptions(env);
     const expiringSubscriptions = [];
@@ -55,7 +60,10 @@ async function checkExpiringSubscriptions(env) {
     const normalizedNotificationHours = Array.isArray(config.NOTIFICATION_HOURS)
       ? config.NOTIFICATION_HOURS.map(h => String(h).padStart(2, '0'))
       : [];
-    const currentHour = String(currentTime.getHours()).padStart(2, '0');
+      
+    // 【顺手加固】：使用 getUTCHours() 保证绝对无视底层 Cloudflare Worker 沙盒时区
+    const currentHour = String(currentTime.getUTCHours()).padStart(2, '0');
+    
     const shouldNotifyThisHour =
       normalizedNotificationHours.includes('*') ||
       normalizedNotificationHours.includes('ALL') ||

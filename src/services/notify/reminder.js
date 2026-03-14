@@ -63,7 +63,7 @@ function formatNotificationContent(subscriptions, config) {
 
     let lunarExpiryText = '';
     if (showLunar) {
-      // 【关键修复】：使用 getTimezoneDateParts 提取配置时区下的真实年月日，确保农历与公历时区一致
+      // 使用 getTimezoneDateParts 提取配置时区下的真实年月日，确保农历与公历时区一致
       const { year, month, day } = getTimezoneDateParts(expiryDateObj, timezone);
       const lunarExpiry = lunarCalendar.solar2lunar(year, month, day);
       lunarExpiryText = lunarExpiry ? `\n农历日期: ${lunarExpiry.fullStr}` : '';
@@ -94,8 +94,7 @@ function formatNotificationContent(subscriptions, config) {
     const amountText = sub.amount ? `\n金额: ¥${sub.amount.toFixed(2)}/周期` : '';
 
     const subscriptionContent = `${statusEmoji} **${sub.name}**
-类型: ${typeText} ${periodText}
-分类: ${categoryText}${amountText}
+类型: ${typeText} ${periodText}${amountText}
 日历类型: ${calendarType}
 到期日期: ${formattedExpiryDate}${lunarExpiryText}
 自动续期: ${autoRenewText}

@@ -42,11 +42,9 @@ async function testSingleSubscriptionNotification(id, env) {
     const autoRenewText = subscription.autoRenew ? '是' : '否';
     const amountText = subscription.amount ? `\n金额: ¥${subscription.amount.toFixed(2)}/周期` : '';
 
-    const categoryText = subscription.category ? subscription.category : '未分类';
-
+    // ✅ 已经移除了 categoryText 的相关拼接，让分类彻底消失
     const commonContent = `**订阅详情**
 类型: ${subscription.customType || '其他'}${amountText}
-分类: ${categoryText}
 日历类型: ${calendarType}
 到期日期: ${formattedExpiryDate}${lunarExpiryText}
 自动续期: ${autoRenewText}

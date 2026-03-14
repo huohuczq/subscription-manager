@@ -95,7 +95,7 @@
                 <option value="Australia/Melbourne">墨尔本时间（UTC+10）</option>
                 <option value="Pacific/Auckland">奥克兰时间（UTC+12）</option>
               </select>
-              <p class="mt-2 text-sm text-gray-500 leading-relaxed">该项仅用于兼容旧配置与展示参考；后端调度与提醒计算统一使用 UTC，页面时间始终按当前设备时区显示。</p>
+              <p class="mt-2 text-sm text-gray-500 leading-relaxed">系统全局业务时区。前端剩余天数显示、后端的到期自动续费以及每日定时提醒通知，都将严格以此时区（如北京时间 0 点）为基准执行。</p>
             </div>
           </div>
         </div>
@@ -103,17 +103,17 @@
         <div class="config-section base-box">
           <h3 class="text-lg font-medium text-gray-900 mb-4">通知设置</h3>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            <div>
-              <label for="notificationHours" class="block text-sm font-medium text-gray-700">通知时段（UTC）</label>
-              <input type="text" id="notificationHours" placeholder="例如：08, 12, 20 或输入 * 表示全天"
-                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-              <p class="mt-1 text-sm text-gray-500">可输入多个小时，使用逗号或空格分隔；留空则默认每天执行一次任务即可</p>
-            </div>
-            <div class="bg-indigo-50 border border-indigo-100 rounded-md p-3 text-sm text-indigo-700">
-              <p class="font-medium mb-1">提示</p>
-              <p>后台统一按 UTC 判断通知时段。示例：北京时间 08:00 对应 UTC 00，请在此填 <code>00</code>。</p>
-              <p class="mt-1">若 Cron 已设置为每小时执行，可用该字段限制实际发送提醒的小时段。</p>
-            </div>
+          <div>
+            <label for="notificationHours" class="block text-sm font-medium text-gray-700">通知时段</label>
+            <input type="text" id="notificationHours" placeholder="例如：08, 12, 20 或输入 * 表示全天"
+              class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+            <p class="mt-1 text-sm text-gray-500">可输入多个小时，使用逗号或空格分隔；留空则默认每天执行一次任务即可</p>
+          </div>
+          <div class="bg-indigo-50 border border-indigo-100 rounded-md p-3 text-sm text-indigo-700">
+            <p class="font-medium mb-1">提示</p>
+            <p>后台将根据上方配置的【时区】来判断通知时段。示例：若时区为北京时间，希望早上 8 点收到通知，请直接填写 <code>08</code>。</p>
+            <p class="mt-1">若 Cloudflare Cron 已设置为每小时触发，可用该字段限制实际发送提醒的具体小时段。</p>
+          </div>
           </div>
           <div class="mb-6">
             <label class="block text-sm font-medium text-gray-700 mb-3">通知方式（可多选）</label>
