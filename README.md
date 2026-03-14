@@ -16,8 +16,6 @@ Subscription Manager 基于 [SubsTracker](https://github.com/wangwangit/SubsTrac
   <img src="src/系统配置.jpeg" alt="项目截图" style="max-width:600px">
 </details>
 
-![image](https://github.com/user-attachments/assets/22ff1592-7836-4f73-aa13-24e9d43d7064)
-
 ---
 
 ## ✨ 功能特色
