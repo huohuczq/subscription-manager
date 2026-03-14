@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -8,6 +9,11 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
   ${themeResources} 
   <style>
+    /* 保证 Toast 提示框永远在最高层级显示，防止被数据管理等高层级弹窗遮挡 */
+    #toast, .toast, #toast-container, div[role="alert"], div[id^="toast"] {
+        z-index: 99999 !important;
+    }
+
     .config-section { border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin-bottom: 24px; }
     .config-section.base-box { background-color: #f9fafb; opacity: 1; }
     html.dark .config-section { border-color: #374151; }
@@ -111,7 +117,7 @@
         </div>
         
         <div class="config-section base-box">
-          <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">通知设置</h3>
+          <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">全局设置</h3>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <div>
               <label for="notificationHours" class="block text-sm font-medium text-gray-700 dark:text-gray-300">通知时段</label>
@@ -556,7 +562,7 @@
     </div>
   </div>
 
-  <div id="dataManagementModal" class="fixed inset-0 hidden overflow-y-auto bg-gray-900 bg-opacity-50 flex items-center justify-center p-4" style="z-index: 9999; backdrop-filter: blur(4px);">
+  <div id="dataManagementModal" class="fixed inset-0 hidden overflow-y-auto bg-gray-600 bg-opacity-50 flex items-center justify-center p-4" style="z-index: 9999;">
     <div class="relative w-full max-w-xl bg-white dark:bg-gray-800 rounded-lg shadow-2xl overflow-hidden transform transition-all">
       <div class="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
         <h3 class="text-base font-medium text-gray-900 dark:text-gray-100"><i class="fas fa-database mr-2 text-indigo-500"></i>数据管理</h3>

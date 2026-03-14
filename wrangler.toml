@@ -168,11 +168,15 @@ name = "subscription-manager-staging"
 
 
 
+
+
+
+
 # KV 命名空间配置（自动生成）
 [[kv_namespaces]]
 binding = "SUBSCRIPTIONS_KV"
-id = "d7c0c9bc39934090b81caceed184f49f"
-preview_id = "6e579b24851046229309020d3c0d9ec6"
+id = "b68d025f839c4e1d8181c41368d8f45e"
+preview_id = "bb9752e6752a4b9b9c05bb2eea8e84f8"
 
 [triggers]
 crons = ["0 * * * *"]
